@@ -1,3 +1,4 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
 const bodyParser = require("body-parser");
@@ -8,8 +9,6 @@ const indexRouter = require("./routes/index");
 const PORT = process.env.PORT || 4000;
 const mongoURI = process.env.LOCAL_DB_ADDRESS;
 const app = express();
-
-require("dotenv").config();
 
 app.use(
   cors({
