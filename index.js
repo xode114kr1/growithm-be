@@ -22,7 +22,7 @@ app.use(bodyParser.json());
 app.use("/api", indexRouter);
 
 mongoose
-  .connect(mongoURI, { useNewUrlParser: true })
+  .connect(mongoURI)
   .then(() => console.log("mongoose connected"))
   .catch((e) => console.log("DB connection fail", e));
 
