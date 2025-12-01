@@ -1,11 +1,12 @@
 const axios = require("axios");
+const jwt = require("jsonwebtoken");
 
 const authController = {};
 
 const CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 
-authController.login = async (req, res) => {
+authController.exchangeToken = async (req, res, next) => {
   try {
     const { code } = req.body;
 
@@ -41,17 +42,66 @@ authController.login = async (req, res) => {
       },
     });
 
-    const githubUser = userResponse.data;
+    req.githubUser = userResponse.data;
 
-    return res.status(200).json({
-      message: "github login success",
-      user: githubUser,
-      // token,
-      // userId: user._id,
-    });
+    next();
   } catch (error) {
     res.status(400).json({ status: "fail login", error: error.message });
   }
+};
+
+authController.findOrCreateUser = async (req, res, next) => {
+  try {
+    const githubUser = req.githubUser;
+
+    // Todo : mongodb에서 user 찾기 -> 실패 시 유저 생성까지
+
+    // 이건 mock 데이터
+    const user = {
+      _id: String(githubUser.id),
+      name: githubUser.name || githubUser.login,
+      avataUrl: githubUser.avata_url,
+    };
+    req.user = user;
+    next();
+  } catch (error) {
+    res.status(400).json({ status: "fail login", error: error.message });
+  }
+};
+
+authController.issueTokensAndRespond = (req, res) => {
+  const user = req.user;
+
+  const accessToken = jwt.sign(
+    { userId: user._id },
+    process.env.JWT_ACCESS_SECRET,
+    { expiresIn: "15m" }
+  );
+  const refreshToken = jwt.sign(
+    { userId: user._id },
+    process.env.JWT_REFRESH_SECRET,
+    { expiresIn: "7d" }
+  );
+
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: false,
+    maxAge: 15 * 60 * 1000,
+  });
+
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: false,
+    maxAge: 7 * 24 * 60 * 60 * 1000,
+  });
+  return res.json({
+    message: "github login success",
+    user: {
+      id: user._id,
+      name: user.name,
+      avata_url: user.avata_url,
+    },
+  });
 };
 
 module.exports = authController;
