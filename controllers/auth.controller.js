@@ -1,5 +1,6 @@
 const axios = require("axios");
 const jwt = require("jsonwebtoken");
+const User = require("../models/User");
 
 const authController = {};
 
@@ -55,14 +56,26 @@ authController.findOrCreateUser = async (req, res, next) => {
     const githubUser = req.githubUser;
 
     // Todo : mongodb에서 user 찾기 -> 실패 시 유저 생성까지
+    let user = await User.findOne({ githubId: githubUser.id });
+    if (!user) {
+      user = await User.create({
+        githubId: githubUser.id,
+      });
+    }
 
     // 이건 mock 데이터
-    const user = {
-      _id: String(githubUser.id),
+    // const user = {
+    //   _id: String(githubUser.id),
+    //   name: githubUser.name || githubUser.login,
+    //   avataUrl: githubUser.avata_url,
+    // };
+    req.user = {
+      _id: user._id,
+      githubId: githubUser.id,
       name: githubUser.name || githubUser.login,
-      avataUrl: githubUser.avata_url,
+      avataUrl: githubUser.avatar_url,
     };
-    req.user = user;
+    console.log(githubUser.avatar_url);
     next();
   } catch (error) {
     res.status(400).json({ status: "fail login", error: error.message });
@@ -96,11 +109,7 @@ authController.issueTokensAndRespond = (req, res) => {
   });
   return res.json({
     message: "github login success",
-    user: {
-      id: user._id,
-      name: user.name,
-      avata_url: user.avata_url,
-    },
+    user,
   });
 };
 
