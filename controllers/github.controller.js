@@ -35,7 +35,7 @@ githubController.webhookChaining = async (req, res) => {
     active: true,
     event: ["push", "pull_request"],
     config: {
-      url: "https://unterminative-tawna-sunproof.ngrok-free.dev/api/github/webhook",
+      url: `${process.env.BACKEND_LOCAL_URL}/github/webhook`,
       content_type: "json",
       secret: "asd",
     },
