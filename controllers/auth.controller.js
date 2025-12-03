@@ -73,7 +73,7 @@ authController.findOrCreateUser = async (req, res, next) => {
       _id: user._id,
       githubId: githubUser.id,
       name: githubUser.name || githubUser.login,
-      avataUrl: githubUser.avatar_url,
+      avatarUrl: githubUser.avatar_url,
     };
     console.log(githubUser.avatar_url);
     next();
@@ -100,6 +100,7 @@ authController.issueTokensAndRespond = (req, res) => {
     httpOnly: true,
     secure: false,
     maxAge: 15 * 60 * 1000,
+    path: "/",
   });
 
   res.cookie("refreshToken", refreshToken, {
