@@ -10,6 +10,7 @@ const Schema = mongoose.Schema;
 const userSchema = Schema(
   {
     githubId: { type: String, required: true, unique: true },
+    githubAccessToken: { type: String, require: true, unique: true },
   },
   { timestamps: true }
 );
