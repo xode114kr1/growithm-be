@@ -10,4 +10,10 @@ router.post(
   githubController.webhookChaining
 );
 
+router.post(
+  "/webhook/receiver",
+  githubController.webhookReceive,
+  githubController.savePendingData
+);
+
 module.exports = router;
