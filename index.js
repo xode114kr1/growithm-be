@@ -1,7 +1,6 @@
 require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
-const bodyParser = require("body-parser");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
 
@@ -18,9 +17,16 @@ app.use(
   })
 );
 
+app.use(
+  express.json({
+    verify: (req, res, buf) => {
+      req.rawBody = buf;
+    },
+  })
+);
+
 app.use(cookieParser());
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+app.use(express.urlencoded({ extended: false }));
 app.use("/api", indexRouter);
 
 mongoose
@@ -30,15 +36,6 @@ mongoose
 
 app.get("/", (req, res) => {
   res.json({ message: "Growithm Express 서버 동작 중 🚀" });
-});
-
-app.post("/github/webhook", (req, res) => {
-  console.log("Webhook 들어옴!");
-  res.sendStatus(200);
-});
-
-app.get("/api/health", (req, res) => {
-  res.json({ status: "ok" });
 });
 
 app.listen(PORT, () => {
