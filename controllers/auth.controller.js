@@ -44,7 +44,7 @@ authController.exchangeToken = async (req, res, next) => {
     });
 
     req.githubUser = userResponse.data;
-
+    req.githubAccessToken = accessToken;
     next();
   } catch (error) {
     res.status(400).json({ status: "fail login", error: error.message });
@@ -54,21 +54,21 @@ authController.exchangeToken = async (req, res, next) => {
 authController.findOrCreateUser = async (req, res, next) => {
   try {
     const githubUser = req.githubUser;
+    const githubAccessToken = req.githubAccessToken;
 
-    // Todo : mongodb에서 user 찾기 -> 실패 시 유저 생성까지
+    // Todo : githubAccessToken 암호화 (bycryptjs 사용 예정)
     let user = await User.findOne({ githubId: githubUser.id });
+
     if (!user) {
       user = await User.create({
         githubId: githubUser.id,
+        githubAccessToken: githubAccessToken,
       });
+    } else {
+      user.githubAccessToken = githubAccessToken;
+      await user.save();
     }
 
-    // 이건 mock 데이터
-    // const user = {
-    //   _id: String(githubUser.id),
-    //   name: githubUser.name || githubUser.login,
-    //   avataUrl: githubUser.avata_url,
-    // };
     req.user = {
       _id: user._id,
       githubId: githubUser.id,
