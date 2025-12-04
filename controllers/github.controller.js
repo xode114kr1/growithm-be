@@ -43,10 +43,13 @@ githubController.webhookChaining = async (req, res) => {
 
 githubController.webhookReceive = async (req, res, next) => {
   const payload = req.body;
+
+  const timestamp = payload.head_commit?.timestamp?.slice(0, 10) || null;
   const repoFullName = payload.repository?.full_name;
   const commitSha = payload.after;
   const githubSenderId = payload.sender?.id;
 
+  req.timestamp = timestamp;
   req.repoFullName = repoFullName;
   req.githubSenderId = githubSenderId;
   req.commitSha = commitSha;
@@ -55,6 +58,7 @@ githubController.webhookReceive = async (req, res, next) => {
 };
 
 githubController.savePendingData = async (req, res) => {
+  const timestamp = req.timestamp;
   const repoFullName = req.repoFullName;
   const githubSenderId = req.githubSenderId;
   const commitSha = req.commitSha;
@@ -66,12 +70,10 @@ githubController.savePendingData = async (req, res) => {
   const newPending = parseBaekjoonReadme(readmd);
   delete newPending.categories;
   newPending.code = code;
-
-  console.log("[1]", githubSenderId);
+  newPending.timestamp = timestamp;
 
   const user = await User.findOne({ githubId: githubSenderId });
 
-  console.log("[2]", user);
   if (!user) {
     return res
       .status(401)
