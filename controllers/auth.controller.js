@@ -63,19 +63,19 @@ authController.findOrCreateUser = async (req, res, next) => {
       user = await User.create({
         githubId: githubUser.id,
         githubAccessToken: githubAccessToken,
+        name: githubUser.name || githubUser.login,
+        avatarUrl: githubUser.avatar_url,
       });
     } else {
       user.githubAccessToken = githubAccessToken;
+      user.name = githubUser.name || githubUser.login;
+      user.avatarUrl = githubUser.avatar_url;
       await user.save();
     }
 
-    req.user = {
-      _id: user._id,
-      githubId: githubUser.id,
-      name: githubUser.name || githubUser.login,
-      avatarUrl: githubUser.avatar_url,
-    };
-    console.log(githubUser.avatar_url);
+    req.user = user;
+    console.log(user);
+
     next();
   } catch (error) {
     res.status(400).json({ status: "fail login", error: error.message });
@@ -107,10 +107,12 @@ authController.issueTokensAndRespond = (req, res) => {
     httpOnly: true,
     secure: false,
     maxAge: 7 * 24 * 60 * 60 * 1000,
+    path: "/",
   });
+
   return res.json({
     message: "github login success",
-    user,
+    data: user,
   });
 };
 
@@ -130,8 +132,7 @@ authController.findUserByToken = async (req, res, next) => {
     }
 
     const user = await User.findById(userId);
-
-    req.userId = user._id;
+    req.user = user;
     next();
   } catch (error) {
     return res.status(401).json({ message: "invalid or expired token" });
