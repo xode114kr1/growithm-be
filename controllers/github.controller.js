@@ -8,7 +8,6 @@ const githubController = {};
 
 githubController.webhookChaining = async (req, res) => {
   const { repoFullName } = req.body;
-
   if (!repoFullName) {
     return res.status(400).json({ message: "repoFullName is required" });
   }
@@ -17,18 +16,7 @@ githubController.webhookChaining = async (req, res) => {
   let repo;
 
   [owner, repo] = repoFullName.split("/");
-  const userId = req.userId;
-
-  if (!userId) {
-    return res.status(401).json({ message: "Unauthorized" });
-  }
-
-  const user = await User.findById(userId);
-  if (!user) {
-    return res
-      .status(400)
-      .json({ message: "GitHub access token not found for this user" });
-  }
+  const user = req.user;
 
   const githubAccessToken = user.githubAccessToken;
   const githubApiUrl = `https://api.github.com/repos/${owner}/${repo}/hooks`;
