@@ -4,8 +4,7 @@ pendingController = {};
 
 pendingController.getPendingList = async (req, res) => {
   try {
-    const userId = req.userId;
-
+    const userId = req.user._id;
     const pendingList = await PendingProblem.find({ userId: userId });
     res.status(201).json({ data: pendingList });
   } catch (error) {
