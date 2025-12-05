@@ -10,4 +10,10 @@ router.get(
   problemController.getProblemList
 );
 
+router.patch(
+  "/solved/:id",
+  autoController.findUserByToken,
+  problemController.saveSolvedProblem
+);
+
 module.exports = router;
