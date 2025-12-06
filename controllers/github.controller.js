@@ -2,7 +2,13 @@ const axios = require("axios");
 const User = require("../models/User");
 const PendingProblem = require("../models/PendingProblem");
 
-const { parseBaekjoonReadme } = require("../utils/parsing");
+const {
+  parseBaekjoonReadme,
+  parseProgrammersReadme,
+} = require("../utils/parsing");
+const Problem = require("../models/Problem");
+
+const flatformMap = { 백준: "beakjoon", 프로그래머스: "programmers" };
 
 const githubController = {};
 
@@ -43,17 +49,19 @@ githubController.webhookChaining = async (req, res) => {
 
 githubController.webhookReceive = async (req, res, next) => {
   const payload = req.body;
-
   const timestamp = payload.head_commit?.timestamp?.slice(0, 10) || null;
   const repoFullName = payload.repository?.full_name;
   const commitSha = payload.after;
   const githubSenderId = payload.sender?.id;
+  const pathList = payload?.head_commit.added;
+  const platform = flatformMap[payload?.head_commit.added[0].split("/")[0]];
 
   req.timestamp = timestamp;
   req.repoFullName = repoFullName;
   req.githubSenderId = githubSenderId;
   req.commitSha = commitSha;
-  req.pathList = payload?.head_commit.added;
+  req.pathList = pathList;
+  req.platform = platform;
   next();
 };
 
@@ -63,14 +71,26 @@ githubController.savePendingData = async (req, res) => {
   const githubSenderId = req.githubSenderId;
   const commitSha = req.commitSha;
   const pathList = req.pathList;
+  const platform = req.platform;
 
   const baseUrl = `https://raw.githubusercontent.com/${repoFullName}/${commitSha}/`;
   const { data: readmd } = await axios.get(baseUrl + pathList[0]);
   const { data: code } = await axios.get(baseUrl + pathList[1]);
-  const newPending = parseBaekjoonReadme(readmd);
+
+  let newPending;
+  if (platform == "beakjoon") {
+    newPending = parseBaekjoonReadme(readmd);
+  } else if (platform == "programmers") {
+    newPending = parseProgrammersReadme(readmd);
+  } else {
+    return res.status(400).json({ error: "Cannot find platform" });
+  }
+
   delete newPending.categories;
   newPending.code = code;
   newPending.timestamp = timestamp;
+  newPending.state = "pending";
+  newPending.platform = platform;
 
   const user = await User.findOne({ githubId: githubSenderId });
 
@@ -81,7 +101,7 @@ githubController.savePendingData = async (req, res) => {
   }
 
   newPending.userId = user._id;
-  await PendingProblem.create(newPending);
+  await Problem.create(newPending);
 };
 
 module.exports = githubController;
