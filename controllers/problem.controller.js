@@ -27,7 +27,8 @@ problemController.saveSolvedProblem = async (req, res) => {
     problem.memo = memo;
 
     await problem.save();
-    return res.statue(200).json({ message: "success" });
+    console.log("asd");
+    return res.status(200).json({ message: "success" });
   } catch (error) {
     return res.status(400).json({ error: error });
   }
