@@ -4,8 +4,20 @@ const problemController = {};
 
 problemController.getProblemList = async (req, res) => {
   try {
+    const page = req.query.page ?? 1;
+    const size = req.query.size ?? 10;
+    const { platform, tier, title, state } = req.query;
     const userId = req.user._id;
-    const problemList = await Problem.find({ userId: userId });
+
+    const filter = { userId };
+    if (platform) filter.platform = platform;
+    if (tier) filter.tier = { $regex: tier, $options: "i" };
+    if (title) filter.title = { $regex: title, $options: "i" };
+    if (state) filter.state = state;
+
+    const problemList = await Problem.find(filter)
+      .skip((page - 1) * size)
+      .limit(size);
     res.status(201).json({ data: problemList });
   } catch (error) {
     res.status(400).json({ error: error });
