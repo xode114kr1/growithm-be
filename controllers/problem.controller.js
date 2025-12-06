@@ -12,6 +12,21 @@ problemController.getProblemList = async (req, res) => {
   }
 };
 
+problemController.getProblemById = async (req, res) => {
+  try {
+    const { id: problemId } = req.params;
+    const problem = await Problem.findById(problemId);
+
+    if (!problem) {
+      return res.status(400).json({ error: "cannot find problem" });
+    }
+
+    return res.status(201).json({ message: "success", data: problem });
+  } catch (error) {
+    return res.status(400).json({ error: error });
+  }
+};
+
 problemController.saveSolvedProblem = async (req, res) => {
   try {
     const userId = req.user._id;
