@@ -10,6 +10,8 @@ router.get(
   problemController.getProblemList
 );
 
+router.get("/:id", problemController.getProblemById);
+
 router.patch(
   "/solved/:id",
   autoController.findUserByToken,
