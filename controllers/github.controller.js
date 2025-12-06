@@ -1,6 +1,5 @@
 const axios = require("axios");
 const User = require("../models/User");
-const PendingProblem = require("../models/PendingProblem");
 
 const {
   parseBaekjoonReadme,
