@@ -11,6 +11,7 @@ const ProblemSchema = Schema(
     },
     state: { type: String, enum: ["pending", "solved"], required: true },
     platform: { type: String, default: "" },
+    categories: { type: [String] },
     timestamp: { type: String, default: "2000-01-01" },
     tier: { type: String, default: "" },
     title: { type: String, default: "" },

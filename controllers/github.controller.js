@@ -85,7 +85,6 @@ githubController.savePendingData = async (req, res) => {
     return res.status(400).json({ error: "Cannot find platform" });
   }
 
-  delete newPending.categories;
   newPending.code = code;
   newPending.timestamp = timestamp;
   newPending.state = "pending";
