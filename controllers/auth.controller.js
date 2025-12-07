@@ -74,7 +74,6 @@ authController.findOrCreateUser = async (req, res, next) => {
     }
 
     req.user = user;
-    console.log(user);
 
     next();
   } catch (error) {

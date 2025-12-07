@@ -12,15 +12,11 @@ const flatformMap = { 백준: "beakjoon", 프로그래머스: "programmers" };
 const githubController = {};
 
 githubController.webhookChaining = async (req, res) => {
-  const { repoFullName } = req.body;
-  if (!repoFullName) {
+  const { owner, repo } = req.body;
+  if (!owner | !repo) {
     return res.status(400).json({ message: "repoFullName is required" });
   }
 
-  let owner;
-  let repo;
-
-  [owner, repo] = repoFullName.split("/");
   const user = req.user;
 
   const githubAccessToken = user.githubAccessToken;
@@ -43,6 +39,13 @@ githubController.webhookChaining = async (req, res) => {
     },
   });
 
+  if (!githubRes) {
+    return res.status(400).json({ message: "Fail to chaining webhook" });
+  }
+
+  user.repo = repo;
+  await user.save();
+
   return res.status(201).json({ message: "Webhook created" });
 };
 
@@ -53,7 +56,7 @@ githubController.webhookReceive = async (req, res, next) => {
   const commitSha = payload.after;
   const githubSenderId = payload.sender?.id;
   const pathList = payload?.head_commit.added;
-  const platform = flatformMap[payload?.head_commit.added[0].split("/")[0]];
+  const platform = flatformMap[payload?.head_commit?.added[0].split("/")[0]];
 
   req.timestamp = timestamp;
   req.repoFullName = repoFullName;
@@ -73,8 +76,13 @@ githubController.savePendingData = async (req, res) => {
   const platform = req.platform;
 
   const baseUrl = `https://raw.githubusercontent.com/${repoFullName}/${commitSha}/`;
-  const { data: readmd } = await axios.get(baseUrl + pathList[0]);
-  const { data: code } = await axios.get(baseUrl + pathList[1]);
+  const readmePath = pathList.find((p) => p.toLowerCase().endsWith(".md"));
+  const codePath = pathList.find((p) => !p.toLowerCase().endsWith(".md"));
+
+  const [readmd, code] = await Promise.all([
+    axios.get(baseUrl + readmePath).then((res) => res.data),
+    axios.get(baseUrl + codePath).then((res) => res.data),
+  ]);
 
   let newPending;
   if (platform == "beakjoon") {
