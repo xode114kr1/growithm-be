@@ -18,7 +18,7 @@ githubController.webhookChaining = async (req, res) => {
   }
 
   const user = req.user;
-  console.log(owner, repo);
+
   const githubAccessToken = user.githubAccessToken;
   const githubApiUrl = `https://api.github.com/repos/${owner}/${repo}/hooks`;
 
