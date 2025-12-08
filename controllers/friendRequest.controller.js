@@ -3,6 +3,20 @@ const User = require("../models/User");
 
 const friendRequestController = {};
 
+friendRequestController.getWaitFriendRequsets = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const friends = await FriendRequest.find({ from: userId }).populate("to");
+
+    if (!friends) return res.status(401).json({ error: "Cannot find friend" });
+    console.log(friends);
+    return res.status(201).json({ message: "Success", data: friends });
+  } catch (error) {
+    return res.status(400).json({ error: error });
+  }
+};
+
 friendRequestController.sendFriendRequest = async (req, res) => {
   try {
     const userId = req.user._id;
