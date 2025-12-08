@@ -1,9 +1,9 @@
 const FriendRequest = require("../models/FriendRequest");
 const User = require("../models/User");
 
-const friendController = {};
+const friendRequestController = {};
 
-friendController.sendFriendRequest = async (req, res) => {
+friendRequestController.sendFriendRequest = async (req, res) => {
   try {
     const userId = req.user._id;
     const { friendName } = req.body;
@@ -14,7 +14,7 @@ friendController.sendFriendRequest = async (req, res) => {
       return res.status(400).json({ error: "Invalied friend name" });
     }
 
-    const friendRequser = await FriendRequest.create({
+    const friendRequest = await FriendRequest.create({
       from: userId,
       to: friend._id,
     });
@@ -25,4 +25,4 @@ friendController.sendFriendRequest = async (req, res) => {
   }
 };
 
-module.exports = friendController;
+module.exports = friendRequestController;

@@ -2,12 +2,12 @@ const express = require("express");
 const router = express.Router();
 
 const authController = require("../controllers/auth.controller");
-const friendController = require("../controllers/friend.controller");
+const friendRequestController = require("../controllers/friendRequest.controller");
 
 router.post(
   "/friend-request",
   authController.findUserByToken,
-  friendController.sendFriendRequest
+  friendRequestController.sendFriendRequest
 );
 
 module.exports = router;
