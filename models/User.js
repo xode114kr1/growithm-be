@@ -14,6 +14,7 @@ const userSchema = Schema(
     githubAccessToken: { type: String, required: true, unique: true },
     name: { type: String },
     avatarUrl: { type: String },
+    friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
   },
   { timestamps: true }
 );
