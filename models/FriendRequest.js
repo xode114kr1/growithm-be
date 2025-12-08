@@ -17,7 +17,7 @@ const friendRequestSchema = new Schema(
   { timestamps: true }
 );
 
-friendRequestSchema.index({ from: 1, to: 1 }, { unique });
+friendRequestSchema.index({ from: 1, to: 1 }, { unique: true });
 
-const FriendRequest = model("FriendRequest", friendRequestSchema);
+const FriendRequest = mongoose.model("FriendRequest", friendRequestSchema);
 module.exports = FriendRequest;
