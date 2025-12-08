@@ -7,10 +7,10 @@ friendRequestController.getReceiveFriendRequsets = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const friends = await FriendRequest.find({ from: userId }).populate("to");
+    const friends = await FriendRequest.find({ to: userId }).populate("to");
 
     if (!friends) return res.status(401).json({ error: "Cannot find friend" });
-    console.log(friends);
+
     return res.status(201).json({ message: "Success", data: friends });
   } catch (error) {
     return res.status(400).json({ error: error });
@@ -21,10 +21,10 @@ friendRequestController.getSendFriendRequsets = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const friends = await FriendRequest.find({ to: userId }).populate("to");
+    const friends = await FriendRequest.find({ from: userId }).populate("to");
 
     if (!friends) return res.status(401).json({ error: "Cannot find friend" });
-    console.log(friends);
+
     return res.status(201).json({ message: "Success", data: friends });
   } catch (error) {
     return res.status(400).json({ error: error });
