@@ -53,7 +53,7 @@ friendRequestController.sendFriendRequest = async (req, res) => {
 
     return res.status(200).json({ message: "Success send friend request" });
   } catch (error) {
-    return res.status(400).json({ error: error });
+    return res.status(400).json({ error: error.message });
   }
 };
 
