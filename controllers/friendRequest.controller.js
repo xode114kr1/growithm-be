@@ -7,7 +7,9 @@ friendRequestController.getReceiveFriendRequsets = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const friends = await FriendRequest.find({ to: userId }).populate("to");
+    const friends = await FriendRequest.find({ to: userId })
+      .populate("from")
+      .populate("to");
 
     if (!friends) return res.status(401).json({ error: "Cannot find friend" });
 
@@ -21,7 +23,9 @@ friendRequestController.getSendFriendRequsets = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const friends = await FriendRequest.find({ from: userId }).populate("to");
+    const friends = await FriendRequest.find({ from: userId })
+      .populate("from")
+      .populate("to");
 
     if (!friends) return res.status(401).json({ error: "Cannot find friend" });
 
@@ -48,6 +52,21 @@ friendRequestController.sendFriendRequest = async (req, res) => {
     });
 
     return res.status(200).json({ message: "Success send friend request" });
+  } catch (error) {
+    return res.status(400).json({ error: error });
+  }
+};
+
+friendRequestController.acceptFriendRequest = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { requestId: requestId } = req.params;
+    console.log(userId, requestId);
+    return res.status(200).json({
+      message: "Success to accept friend request",
+      userId,
+      requestId,
+    });
   } catch (error) {
     return res.status(400).json({ error: error });
   }

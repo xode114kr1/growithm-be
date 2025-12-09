@@ -22,4 +22,10 @@ router.post(
   friendRequestController.sendFriendRequest
 );
 
+router.post(
+  "/:requestId/accept",
+  authController.findUserByToken,
+  friendRequestController.acceptFriendRequest
+);
+
 module.exports = router;
