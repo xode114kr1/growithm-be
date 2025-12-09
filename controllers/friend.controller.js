@@ -1,8 +1,13 @@
+const User = require("../models/User");
+
 const friendController = {};
 
-friendController.getFriendList = (req, res) => {
+friendController.getFriendList = async (req, res) => {
   try {
-    const user = req.user;
+    const userId = req.user._id;
+    const user = await User.findById(userId)
+      .populate("friends", "name avatarUrl githubId")
+      .lean();
 
     return res.status(200).json({ message: "success", data: user.friends });
   } catch (error) {
