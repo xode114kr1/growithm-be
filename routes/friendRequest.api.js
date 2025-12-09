@@ -28,4 +28,16 @@ router.post(
   friendRequestController.acceptFriendRequest
 );
 
+router.delete(
+  "/:requestId/reject",
+  authController.findUserByToken,
+  friendRequestController.rejectFriendRequest
+);
+
+router.delete(
+  "/:requestId/cancel",
+  authController.findUserByToken,
+  friendRequestController.cancelFriendRequest
+);
+
 module.exports = router;
