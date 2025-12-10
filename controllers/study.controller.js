@@ -8,7 +8,12 @@ studyController.createStudy = async (req, res) => {
     const userId = req.user._id;
     const { title, explanation, members } = req.body;
 
-    const study = await Study.create({ title, explanation, owner: userId });
+    const study = await Study.create({
+      title,
+      explanation,
+      owner: userId,
+      members: [userId],
+    });
 
     members?.map(async (item) => {
       const studyRequest = await StudyRequest.create({
