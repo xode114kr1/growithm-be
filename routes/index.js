@@ -6,6 +6,7 @@ const githubApi = require("./github.api");
 const problemApi = require("./problem.api");
 const friendRequestApi = require("./friendRequest.api");
 const friendApi = require("./friend.api");
+const studyApi = require("./study.api");
 
 const router = express.Router();
 
@@ -15,5 +16,6 @@ router.use("/user", userApi);
 router.use("/problem", problemApi);
 router.use("/friend-request", friendRequestApi);
 router.use("/friend", friendApi);
+router.use("/study", studyApi);
 
 module.exports = router;
