@@ -4,5 +4,5 @@ const router = express.Router();
 const userController = require("../controllers/user.controller");
 
 router.post("/logout", userController.logout);
-
+router.get("/", userController.getUserByName);
 module.exports = router;
