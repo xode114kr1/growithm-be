@@ -11,5 +11,7 @@ const studySchema = Schema(
   { timestamps: true }
 );
 
+studySchema.index({ members: 1 });
+
 const Study = mongoose.model("Study", studySchema);
 module.exports = Study;
