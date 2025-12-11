@@ -53,4 +53,14 @@ studyRequestController.acceptStudtRequest = async (req, res) => {
   }
 };
 
+studyRequestController.rejectStudyRequest = async (req, res) => {
+  try {
+    const { studyRequestId } = req.params;
+    await StudyRequest.findByIdAndDelete(studyRequestId);
+    return res.status(200).json({ message: "Success reject study request" });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
 module.exports = studyRequestController;

@@ -16,4 +16,9 @@ router.post(
   studyRequestController.acceptStudtRequest
 );
 
+router.delete(
+  "/:studyRequestId/reject",
+  studyRequestController.rejectStudyRequest
+);
+
 module.exports = router;
