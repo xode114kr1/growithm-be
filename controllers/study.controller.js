@@ -3,6 +3,20 @@ const StudyRequest = require("../models/StudyRequest");
 
 const studyController = {};
 
+studyController.getStudyList = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const studyList = await Study.find({ members: userId })
+      .populate("members")
+      .populate("owner");
+    return res
+      .status(201)
+      .json({ message: "Success to find study list", data: studyList });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
 studyController.createStudy = async (req, res) => {
   try {
     const userId = req.user._id;
