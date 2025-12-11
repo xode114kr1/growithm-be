@@ -10,4 +10,10 @@ router.get(
   studyRequestController.getStudyRequestList
 );
 
+router.post(
+  "/:studyRequestId/accept",
+  authController.findUserByToken,
+  studyRequestController.acceptStudtRequest
+);
+
 module.exports = router;
