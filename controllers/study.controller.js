@@ -1,5 +1,6 @@
 const Study = require("../models/Study");
 const StudyRequest = require("../models/StudyRequest");
+const StudyUserScore = require("../models/StudyUserScore");
 
 const studyController = {};
 
@@ -57,6 +58,20 @@ studyController.createStudy = async (req, res) => {
       message: "Success",
       data: { title, explanation, members, userId },
     });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+studyController.getStudyUserScoreById = async (req, res) => {
+  try {
+    const { studyId } = req.params;
+    const studyUserScoreList = await StudyUserScore.find({
+      study: studyId,
+    }).populate("user");
+    return res
+      .status(201)
+      .json({ message: "success", data: studyUserScoreList });
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }
