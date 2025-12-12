@@ -1,4 +1,5 @@
 const Problem = require("../models/Problem");
+const Study = require("../models/Study");
 
 const problemController = {};
 
@@ -59,4 +60,28 @@ problemController.saveSolvedProblem = async (req, res) => {
   }
 };
 
+problemController.shareProblemToStudys = async (req, res) => {
+  try {
+    const { problemId, studyIds } = req.body;
+    console.log(problemId, studyIds);
+    const problem = await Problem.findById(problemId);
+    if (!problem) {
+      return res.status(404).json({ error: "cannot find problem" });
+    }
+    await Promise.all(
+      studyIds.map(async (studyId) => {
+        const study = await Study.findById(studyId);
+        if (!study) return;
+
+        if (!study.problems.includes(problemId)) {
+          study.problems.push(problemId);
+          await study.save();
+        }
+      })
+    );
+    return res.status(200).json({ message: "success" });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
 module.exports = problemController;

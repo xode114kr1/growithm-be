@@ -18,4 +18,6 @@ router.patch(
   problemController.saveSolvedProblem
 );
 
+router.post("/share", problemController.shareProblemToStudys);
+
 module.exports = router;
