@@ -1,5 +1,7 @@
 const Problem = require("../models/Problem");
 const Study = require("../models/Study");
+const StudyUserScore = require("../models/StudyUserScore");
+const { exchangeStudyScore } = require("../utils/score");
 
 const problemController = {};
 
@@ -63,20 +65,33 @@ problemController.saveSolvedProblem = async (req, res) => {
 problemController.shareProblemToStudys = async (req, res) => {
   try {
     const { problemId, studyIds } = req.body;
-    console.log(problemId, studyIds);
+
     const problem = await Problem.findById(problemId);
     if (!problem) {
       return res.status(404).json({ error: "cannot find problem" });
     }
+
+    const score = exchangeStudyScore(problem.platform, problem.tier);
+
     await Promise.all(
       studyIds.map(async (studyId) => {
         const study = await Study.findById(studyId);
-        if (!study) return;
+        if (!study) throw new Error(`cannot find study: ${studyId}`);
 
-        if (!study.problems.includes(problemId)) {
-          study.problems.push(problemId);
-          await study.save();
-        }
+        const alreadyShared = study.problems.some(
+          (id) => id.toString() === String(problemId)
+        );
+        if (alreadyShared) return;
+
+        await StudyUserScore.updateOne(
+          { user: problem.userId, study: study._id },
+          { $inc: { score } },
+          { upsert: true }
+        );
+
+        study.problems.push(problemId);
+        study.score += score;
+        await study.save();
       })
     );
     return res.status(200).json({ message: "success" });
