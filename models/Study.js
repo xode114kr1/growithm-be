@@ -7,6 +7,8 @@ const studySchema = Schema(
     explanation: { type: String },
     owner: { type: Schema.Types.ObjectId, ref: "User", required: true },
     members: { type: [Schema.Types.ObjectId], ref: "User", default: [] },
+    problems: { type: [Schema.Types.ObjectId], ref: "Problem", default: [] },
+    score: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
