@@ -10,6 +10,8 @@ router.get(
   studyRequestController.getStudyRequestList
 );
 
+router.get("/send/:studyId", studyRequestController.getSendStudyRequest);
+
 router.post(
   "/send",
   authController.findUserByToken,

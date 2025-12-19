@@ -24,6 +24,21 @@ studyRequestController.getStudyRequestList = async (req, res) => {
   }
 };
 
+studyRequestController.getSendStudyRequest = async (req, res) => {
+  try {
+    const { studyId } = req.params;
+    const studyRequestList = await StudyRequest.find({ studyId }).populate(
+      "userId"
+    );
+    return res.status(200).json({
+      message: "Success find study request list by study id",
+      data: studyRequestList,
+    });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
 studyRequestController.sendStudyRequest = async (req, res) => {
   try {
     const userId = req.user._id;
