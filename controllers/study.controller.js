@@ -32,7 +32,6 @@ studyController.getStudyById = async (req, res) => {
         },
       });
 
-    console.log(study);
     return res.status(200).json({ message: "Success find study", data: study });
   } catch (error) {
     return res.status(400).json({ error: error.message });

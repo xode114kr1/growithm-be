@@ -7,7 +7,6 @@ const romanToNumber = {
 };
 
 function exchangeStudyScore(platform, level) {
-  console.log(platform, level);
   if (!platform) return 0;
 
   const p = String(platform).toLowerCase();
