@@ -1,5 +1,6 @@
 const Study = require("../models/Study");
 const StudyRequest = require("../models/StudyRequest");
+const User = require("../models/User");
 
 const studyRequestController = {};
 
@@ -18,6 +19,29 @@ studyRequestController.getStudyRequestList = async (req, res) => {
       meeage: "Success to find study request",
       data: studyRequestList,
     });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
+studyRequestController.sendStudyRequest = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { studyId, inviteUserName } = req.body;
+
+    const study = await Study.findById(studyId);
+    if (!study) {
+      return res.status(400).json({ error: "cannot find study" });
+    }
+
+    if (study.owner.toString() !== userId.toString()) {
+      return res.status(400).json({ error: "권한이 없습니다" });
+    }
+
+    const inviteUser = await User.findOne({ name: inviteUserName });
+
+    await StudyRequest.create({ studyId, userId: inviteUser });
+    return res.status(200).json({ message: "Success to send study request" });
   } catch (error) {
     return res.status(400).json({ error: error.message });
   }

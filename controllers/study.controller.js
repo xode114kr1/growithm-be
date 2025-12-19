@@ -23,8 +23,15 @@ studyController.getStudyById = async (req, res) => {
     const { studyId } = req.params;
     const study = await Study.findById(studyId)
       .populate("members")
-      .populate("problems")
-      .populate("owner");
+      .populate("owner")
+      .populate({
+        path: "problems",
+        populate: {
+          path: "userId",
+          model: "User",
+        },
+      });
+
     console.log(study);
     return res.status(200).json({ message: "Success find study", data: study });
   } catch (error) {
