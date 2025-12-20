@@ -83,4 +83,19 @@ studyController.getStudyUserScoreById = async (req, res) => {
   }
 };
 
+studyController.deleteStudyById = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { studyId } = req.params;
+
+    const deleteStudy = await Study.findByIdAndDelete(studyId);
+    if (!deleteStudy) {
+      return res.status(400).json({ error: "Fail to delete study" });
+    }
+    return res.status(200).json({ message: "Success delete study" });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
 module.exports = studyController;
