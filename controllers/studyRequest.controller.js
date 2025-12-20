@@ -27,9 +27,10 @@ studyRequestController.getStudyRequestList = async (req, res) => {
 studyRequestController.getSendStudyRequest = async (req, res) => {
   try {
     const { studyId } = req.params;
-    const studyRequestList = await StudyRequest.find({ studyId }).populate(
-      "userId"
-    );
+    const studyRequestList = await StudyRequest.find({
+      studyId,
+      state: "pending",
+    }).populate("userId");
     return res.status(200).json({
       message: "Success find study request list by study id",
       data: studyRequestList,
