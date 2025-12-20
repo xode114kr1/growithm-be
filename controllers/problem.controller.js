@@ -44,17 +44,18 @@ problemController.getProblemById = async (req, res) => {
 
 problemController.saveSolvedProblem = async (req, res) => {
   try {
+    const session = req.dbSession;
     const userId = req.user._id;
     const { id: problemId } = req.params;
     const { memo } = req.body;
-    let problem = await Problem.findById(problemId);
+    let problem = await Problem.findById(problemId).session(session);
 
     if (!problem.userId.equals(userId)) {
       return res.status(400).json({ error: "cannot match user" });
     }
     problem.state = "solved";
     problem.memo = memo;
-    await problem.save();
+    await problem.save({ session });
 
     return res.status(200).json({ message: "success" });
   } catch (error) {
