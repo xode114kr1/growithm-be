@@ -15,6 +15,7 @@ const userSchema = Schema(
     name: { type: String },
     avatarUrl: { type: String },
     friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
+    score: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
