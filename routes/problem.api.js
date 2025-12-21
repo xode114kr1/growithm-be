@@ -12,6 +12,8 @@ router.get(
   problemController.getProblemList
 );
 
+router.get("/list/:userId", problemController.getProblemListByUserId);
+
 router.get("/:id", problemController.getProblemById);
 
 router.patch(
