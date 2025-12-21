@@ -18,7 +18,7 @@ const friendRequestSchema = Schema(
       enum: ["pending", "rejected", "accepted"],
       default: "pending",
     },
-    pairKey: { type: String, required: true },
+    pairKey: { type: String, required: true, unique: true },
   },
 
   { timestamps: true }
