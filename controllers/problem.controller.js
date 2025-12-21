@@ -27,6 +27,17 @@ problemController.getProblemList = async (req, res) => {
   }
 };
 
+// user id로 problemList를 불러오는 함수
+problemController.getProblemListByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const problems = await Problem.find({ userId });
+    return res.status(201).json({ message: "success", data: problems });
+  } catch (error) {
+    return res.status(400).json({ error: error.message });
+  }
+};
+
 problemController.getProblemById = async (req, res) => {
   try {
     const { id: problemId } = req.params;

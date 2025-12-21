@@ -6,7 +6,7 @@ friendController.getFriendList = async (req, res) => {
   try {
     const userId = req.user._id;
     const user = await User.findById(userId)
-      .populate("friends", "name avatarUrl githubId")
+      .populate("friends", "name avatarUrl githubId score updatedAt createdAt")
       .lean();
 
     return res.status(200).json({ message: "success", data: user.friends });
