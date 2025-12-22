@@ -154,9 +154,9 @@ friendRequestController.deleteFriendRequest = async (req, res, next) => {
     const pairKey = `${a}:${b}`;
 
     await FriendRequest.findOneAndDelete({ pairKey }, { session });
-    next();
+    return next();
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 

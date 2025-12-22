@@ -17,7 +17,7 @@ friendController.getFriendList = async (req, res) => {
 
 // user의 friends에서 friendId를 삭제
 // friend의 friends에서 userId를 삭제
-friendController.deleteFriend = async (req, res) => {
+friendController.deleteFriend = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const { friendId } = req.params;
@@ -26,18 +26,20 @@ friendController.deleteFriend = async (req, res) => {
     await User.findByIdAndUpdate(
       userId,
       { $pull: { friends: friendId } },
-      { new: true }
-    ).session(session);
+      { new: true, session }
+    );
 
     await User.findByIdAndUpdate(
       friendId,
       { $pull: { friends: userId } },
-      { new: true }
-    ).session(session);
+      { new: true, session }
+    );
 
-    return res.status(200).json({ message: "Success delete friend" });
+    res.status(200).json({ message: "Success delete friend" });
+    console.log("df");
+    return next();
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 
