@@ -144,4 +144,20 @@ friendRequestController.cancelFriendRequest = async (req, res) => {
   }
 };
 
+friendRequestController.deleteFriendRequest = async (req, res, next) => {
+  try {
+    const userId = req.user._id;
+    const { friendId } = req.params;
+    const session = req.dbSession;
+
+    const [a, b] = [userId, friendId].sort();
+    const pairKey = `${a}:${b}`;
+
+    await FriendRequest.findOneAndDelete({ pairKey }, { session });
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = friendRequestController;
