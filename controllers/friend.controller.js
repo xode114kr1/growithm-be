@@ -11,7 +11,7 @@ friendController.getFriendList = async (req, res) => {
 
     return res.status(200).json({ message: "success", data: user.friends });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 

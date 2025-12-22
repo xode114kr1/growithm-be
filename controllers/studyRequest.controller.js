@@ -20,7 +20,7 @@ studyRequestController.getStudyRequestList = async (req, res) => {
       data: studyRequestList,
     });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 
@@ -36,7 +36,7 @@ studyRequestController.getSendStudyRequest = async (req, res) => {
       data: studyRequestList,
     });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 
@@ -59,7 +59,7 @@ studyRequestController.sendStudyRequest = async (req, res) => {
     await StudyRequest.create({ studyId, userId: inviteUser });
     return res.status(200).json({ message: "Success to send study request" });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 
@@ -89,7 +89,7 @@ studyRequestController.acceptStudtRequest = async (req, res) => {
 
     return res.status(200).json({ message: "Success to accept study" });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 
@@ -99,7 +99,7 @@ studyRequestController.rejectStudyRequest = async (req, res) => {
     await StudyRequest.findByIdAndDelete(studyRequestId);
     return res.status(200).json({ message: "Success reject study request" });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 

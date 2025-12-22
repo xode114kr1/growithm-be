@@ -34,7 +34,7 @@ problemController.getProblemListByUserId = async (req, res) => {
     const problems = await Problem.find({ userId });
     return res.status(201).json({ message: "success", data: problems });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 
@@ -49,7 +49,7 @@ problemController.getProblemById = async (req, res) => {
 
     return res.status(201).json({ message: "success", data: problem });
   } catch (error) {
-    return res.status(400).json({ error: error });
+    return next(error);
   }
 };
 
@@ -109,7 +109,7 @@ problemController.shareProblemToStudys = async (req, res) => {
     );
     return res.status(200).json({ message: "success" });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 module.exports = problemController;

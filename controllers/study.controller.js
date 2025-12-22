@@ -14,7 +14,7 @@ studyController.getStudyList = async (req, res) => {
       .status(201)
       .json({ message: "Success to find study list", data: studyList });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 
@@ -34,7 +34,7 @@ studyController.getStudyById = async (req, res) => {
 
     return res.status(200).json({ message: "Success find study", data: study });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 
@@ -65,7 +65,7 @@ studyController.createStudy = async (req, res) => {
       data: { title, explanation, members, userId },
     });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 
@@ -79,7 +79,7 @@ studyController.getStudyUserScoreById = async (req, res) => {
       .status(201)
       .json({ message: "success", data: studyUserScoreList });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 
@@ -94,7 +94,7 @@ studyController.deleteStudyById = async (req, res) => {
     }
     return res.status(200).json({ message: "Success delete study" });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 

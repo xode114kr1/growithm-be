@@ -15,7 +15,7 @@ friendRequestController.getReceiveFriendRequsets = async (req, res) => {
 
     return res.status(201).json({ message: "Success", data: friends });
   } catch (error) {
-    return res.status(400).json({ error: error });
+    return next(error);
   }
 };
 
@@ -31,7 +31,7 @@ friendRequestController.getSendFriendRequsets = async (req, res) => {
 
     return res.status(201).json({ message: "Success", data: friends });
   } catch (error) {
-    return res.status(400).json({ error: error });
+    return next(error);
   }
 };
 
@@ -53,7 +53,7 @@ friendRequestController.sendFriendRequest = async (req, res) => {
 
     return res.status(200).json({ message: "Success send friend request" });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 
@@ -90,7 +90,7 @@ friendRequestController.acceptFriendRequest = async (req, res) => {
       message: "Success to accept friend request",
     });
   } catch (error) {
-    return res.status(400).json({ error: error });
+    return next(error);
   }
 };
 
@@ -117,7 +117,7 @@ friendRequestController.rejectFriendRequest = async (req, res) => {
       message: "Success to reject friend request",
     });
   } catch (error) {
-    return res.status(400).json({ error: error });
+    return next(error);
   }
 };
 
@@ -140,7 +140,7 @@ friendRequestController.cancelFriendRequest = async (req, res) => {
       message: "Success to cancel friend request",
     });
   } catch (error) {
-    return res.status(400).json({ error: error });
+    return next(error);
   }
 };
 
