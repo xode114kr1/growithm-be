@@ -19,9 +19,9 @@ scoreController.addScore = async (req, res, next) => {
     user.score += score;
     await user.save({ session });
 
-    next();
+    return next();
   } catch (error) {
-    next(error);
+    return next(error);
   }
 };
 

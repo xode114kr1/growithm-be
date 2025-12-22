@@ -4,7 +4,7 @@ const router = express.Router();
 const problemController = require("../controllers/problem.controller");
 const autoController = require("../controllers/auth.controller");
 const scoreController = require("../controllers/score.controller");
-const { startTx } = require("../middlewares/transaction");
+const { startTx, endTx } = require("../middlewares/transaction");
 
 router.get(
   "/",
@@ -21,14 +21,16 @@ router.patch(
   autoController.findUserByToken,
   startTx,
   scoreController.addScore,
-  problemController.saveSolvedProblem
+  problemController.saveSolvedProblem,
+  endTx
 );
 
 router.patch(
   "/edit/:id/",
   autoController.findUserByToken,
   startTx,
-  problemController.saveSolvedProblem
+  problemController.saveSolvedProblem,
+  endTx
 );
 
 router.post("/share", problemController.shareProblemToStudys);

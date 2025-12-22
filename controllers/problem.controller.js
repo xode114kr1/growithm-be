@@ -53,7 +53,7 @@ problemController.getProblemById = async (req, res) => {
   }
 };
 
-problemController.saveSolvedProblem = async (req, res) => {
+problemController.saveSolvedProblem = async (req, res, next) => {
   try {
     const session = req.dbSession;
     const userId = req.user._id;
@@ -68,9 +68,10 @@ problemController.saveSolvedProblem = async (req, res) => {
     problem.memo = memo;
     await problem.save({ session });
 
-    return res.status(200).json({ message: "success" });
+    res.status(200).json({ message: "success" });
+    return next();
   } catch (error) {
-    return res.status(400).json({ error: error });
+    return next(error);
   }
 };
 
