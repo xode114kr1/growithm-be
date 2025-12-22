@@ -29,6 +29,26 @@ app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
 app.use("/api", indexRouter);
 
+app.use(async (err, req, res, next) => {
+  const session = req.dbSession;
+
+  try {
+    if (session?.inTransaction?.()) {
+      await session.abortTransaction();
+    }
+  } catch (_) {
+    // ignore
+  } finally {
+    if (session) {
+      await session.endSession().catch(() => {});
+    }
+    req.dbSession = null;
+  }
+
+  const status = err.statusCode || 500;
+  return res.status(status).json({ error: err.message || "Server Error" });
+});
+
 mongoose
   .connect(mongoURI)
   .then(() => console.log("mongoose connected"))
