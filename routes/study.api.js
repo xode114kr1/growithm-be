@@ -11,7 +11,13 @@ const memberController = require("../controllers/member.controller");
 router.get("/", authController.findUserByToken, studyController.getStudyList);
 router.get("/user-score/:studyId", studyController.getStudyUserScoreById);
 router.get("/:studyId", studyController.getStudyById);
-router.post("/", authController.findUserByToken, studyController.createStudy);
+router.post(
+  "/",
+  authController.findUserByToken,
+  startTx,
+  studyController.createStudy,
+  endTx
+);
 
 // owner가 study를 삭제하는 기능
 router.delete(

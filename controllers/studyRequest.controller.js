@@ -1,5 +1,6 @@
 const Study = require("../models/Study");
 const StudyRequest = require("../models/StudyRequest");
+const StudyUserScore = require("../models/StudyUserScore");
 const User = require("../models/User");
 
 const studyRequestController = {};
@@ -63,31 +64,67 @@ studyRequestController.sendStudyRequest = async (req, res) => {
   }
 };
 
-studyRequestController.acceptStudtRequest = async (req, res) => {
+studyRequestController.acceptStudyRequest = async (req, res, next) => {
   try {
+    const session = req.dbSession;
     const userId = req.user._id;
     const { studyRequestId } = req.params;
 
-    const studyRequest = await StudyRequest.findById(studyRequestId);
+    // 스터디 요청 인증
+    const studyRequest = await StudyRequest.findById(studyRequestId, null, {
+      session,
+    });
+
     if (!studyRequest) {
-      return res.status(400).json({ error: "cannot find study request" });
+      const error = new Error("Study-request not found");
+      error.status = 404;
+      return next(error);
+    }
+
+    if (studyRequest.state !== "pending") {
+      if (studyRequest.state === "accepted") {
+        const error = new Error("Study-request already accepted");
+        error.status = 409;
+        return next(error);
+      } else if (studyRequest.state === "rejected") {
+        const error = new Error("Study-request already rejected");
+        error.status = 409;
+        return next(error);
+      }
     }
 
     if (studyRequest.userId.toString() != userId.toString()) {
-      return res
-        .status(400)
-        .json({ error: "is not matched user to study request" });
+      const error = new Error("Study-request access denied");
+      error.status = 403;
+      return next(error);
+    }
+    // 스터디 요청 수락
+    studyRequest.state = "accepted";
+    await studyRequest.save({ session });
+
+    // 스터디에 맴버 추가
+    const studyId = studyRequest.studyId;
+    const updatedStudy = await Study.findByIdAndUpdate(
+      studyId,
+      { $addToSet: { members: userId } },
+      { session, new: true }
+    );
+
+    if (!updatedStudy) {
+      const error = new Error("Study not found");
+      error.status = 404;
+      return next(error);
     }
 
-    studyRequest.state = "accepted";
+    // 스터디의 유저 스코어 생성
+    await StudyUserScore.findOneAndUpdate(
+      { user: userId, study: studyId },
+      { $setOnInsert: { user: userId, study: studyId, score: 0 } },
+      { upsert: true, new: true, session }
+    );
 
-    const study = await Study.findById(studyRequest.studyId);
-    study.members.push(userId);
-
-    await study.save();
-    await studyRequest.save();
-
-    return res.status(200).json({ message: "Success to accept study" });
+    res.status(200).json({ message: "Success to accept study" });
+    return next();
   } catch (error) {
     return next(error);
   }

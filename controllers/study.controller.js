@@ -38,32 +38,40 @@ studyController.getStudyById = async (req, res) => {
   }
 };
 
-studyController.createStudy = async (req, res) => {
+studyController.createStudy = async (req, res, next) => {
   try {
+    const session = req.dbSession;
     const userId = req.user._id;
     const { title, explanation, members } = req.body;
 
-    const study = await Study.create({
-      title,
-      explanation,
-      owner: userId,
-      members: [userId],
-    });
+    const [study] = await Study.create(
+      [
+        {
+          title,
+          explanation,
+          owner: userId,
+          members: [userId],
+        },
+      ],
+      { session }
+    );
 
-    members?.map(async (item) => {
-      const studyRequest = await StudyRequest.create({
-        studyId: study?._id,
-        userId: item,
-      });
-      if (!studyRequest) {
-        return res.status(404).json({ error: "cannot create study request" });
-      }
-    });
+    await Promise.all(
+      (members ?? [])?.map((item) =>
+        StudyRequest.create([{ studyId: study._id, userId: item }], { session })
+      )
+    );
 
-    return res.status(200).json({
-      message: "Success",
-      data: { title, explanation, members, userId },
-    });
+    const studyId = study._id;
+
+    await StudyUserScore.findOneAndUpdate(
+      { user: userId, study: studyId },
+      { $setOnInsert: { user: userId, study: studyId, score: 0 } },
+      { upsert: true, new: true, session }
+    );
+
+    res.status(200).json({ message: "Success create study" });
+    return next();
   } catch (error) {
     return next(error);
   }

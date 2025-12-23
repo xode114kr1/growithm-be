@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const { startTx, endTx } = require("../middlewares/transaction");
 
 const authController = require("../controllers/auth.controller");
 const studyRequestController = require("../controllers/studyRequest.controller");
@@ -21,7 +22,9 @@ router.post(
 router.post(
   "/:studyRequestId/accept",
   authController.findUserByToken,
-  studyRequestController.acceptStudtRequest
+  startTx,
+  studyRequestController.acceptStudyRequest,
+  endTx
 );
 
 router.delete(
