@@ -13,11 +13,11 @@ router.get(
 
 router.get("/send/:studyId", studyRequestController.getSendStudyRequest);
 
-router.post(
-  "/send",
-  authController.findUserByToken,
-  studyRequestController.sendStudyRequest
-);
+// router.post(
+//   "/send",
+//   authController.findUserByToken,
+//   studyRequestController.sendStudyRequest
+// );
 
 router.post(
   "/:studyRequestId/accept",

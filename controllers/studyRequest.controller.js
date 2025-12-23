@@ -41,24 +41,19 @@ studyRequestController.getSendStudyRequest = async (req, res) => {
   }
 };
 
-studyRequestController.sendStudyRequest = async (req, res) => {
+studyRequestController.sendStudyRequest = async (req, res, next) => {
   try {
-    const userId = req.user._id;
-    const { studyId, inviteUserName } = req.body;
+    const session = req.dbSession;
 
-    const study = await Study.findById(studyId);
-    if (!study) {
-      return res.status(400).json({ error: "cannot find study" });
-    }
-
-    if (study.owner.toString() !== userId.toString()) {
-      return res.status(400).json({ error: "권한이 없습니다" });
-    }
+    const { studyId } = req.params;
+    const { inviteUserName } = req.body;
 
     const inviteUser = await User.findOne({ name: inviteUserName });
 
-    await StudyRequest.create({ studyId, userId: inviteUser });
-    return res.status(200).json({ message: "Success to send study request" });
+    await StudyRequest.create([{ studyId, userId: inviteUser }], { session });
+
+    res.status(200).json({ message: "Success to send study request" });
+    return next();
   } catch (error) {
     return next(error);
   }
