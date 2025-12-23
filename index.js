@@ -31,7 +31,7 @@ app.use("/api", indexRouter);
 
 app.use(async (err, req, res, next) => {
   const session = req.dbSession;
-
+  console.log(err);
   try {
     if (session?.inTransaction?.()) {
       await session.abortTransaction();
