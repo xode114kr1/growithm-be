@@ -4,36 +4,42 @@ const router = express.Router();
 const authController = require("../controllers/auth.controller");
 const friendRequestController = require("../controllers/friendRequest.controller");
 
+// me의 send-friend-request 리스트 요청
 router.get(
-  "/send",
+  "/send/me",
   authController.findUserByToken,
   friendRequestController.getSendFriendRequsets
 );
 
+// me의 receive-friend-request 리스트 요청
 router.get(
-  "/receive",
+  "/receive/me",
   authController.findUserByToken,
   friendRequestController.getReceiveFriendRequsets
 );
 
+// friend-request를 생성
 router.post(
   "/",
   authController.findUserByToken,
   friendRequestController.sendFriendRequest
 );
 
+// friend-request를 수락
 router.post(
   "/:requestId/accept",
   authController.findUserByToken,
   friendRequestController.acceptFriendRequest
 );
 
+// friend-request를 거절
 router.delete(
   "/:requestId/reject",
   authController.findUserByToken,
   friendRequestController.rejectFriendRequest
 );
 
+// friend-request를 취소
 router.delete(
   "/:requestId/cancel",
   authController.findUserByToken,
