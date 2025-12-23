@@ -11,16 +11,10 @@ memberController.kickStudyMemberById = async (req, res, next) => {
     const session = req.dbSession;
     const { memberId, studyId } = req.params;
 
-    const deleteStudyRequest = await StudyRequest.findOneAndDelete(
+    await StudyRequest.findOneAndDelete(
       { studyId, userId: memberId },
       { session }
     );
-
-    if (!deleteStudyRequest) {
-      const error = new Error("Study-request not found");
-      error.status = 404;
-      return next(error);
-    }
 
     const updatedStudy = await Study.findByIdAndUpdate(
       studyId,
