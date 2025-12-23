@@ -44,11 +44,25 @@ studyRequestController.getSendStudyRequest = async (req, res) => {
 studyRequestController.sendStudyRequest = async (req, res, next) => {
   try {
     const session = req.dbSession;
-
+    const userId = req.user._id;
     const { studyId } = req.params;
     const { inviteUserName } = req.body;
 
+    const study = await Study.findById(studyId);
+
     const inviteUser = await User.findOne({ name: inviteUserName });
+
+    if (!study) {
+      const error = new Error("Study not found");
+      error.status = 404;
+      return next(error);
+    }
+
+    if (study.owner.toString() == inviteUser.toString()) {
+      const error = new Error("Owner cannot leave");
+      error.status = 403;
+      return next(error);
+    }
 
     await StudyRequest.create([{ studyId, userId: inviteUser }], { session });
 

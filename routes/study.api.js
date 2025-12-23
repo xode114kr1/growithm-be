@@ -48,4 +48,13 @@ router.delete(
   endTx
 );
 
+// user가 study를 leave하는 기능
+router.delete(
+  "/:studyId/leave",
+  authController.findUserByToken,
+  startTx,
+  studyController.leaveStudy,
+  endTx
+);
+
 module.exports = router;

@@ -108,4 +108,48 @@ studyController.deleteStudyById = async (req, res, next) => {
   }
 };
 
+studyController.leaveStudy = async (req, res, next) => {
+  try {
+    const session = req.dbSession;
+    const userId = req.user._id;
+    const { studyId } = req.params;
+
+    const study = await Study.findById(studyId);
+
+    if (!study) {
+      const error = new Error("Study not found");
+      error.status = 404;
+      return next(error);
+    }
+
+    if (study.owner.toString() == userId.toString()) {
+      const error = new Error("Owner cannot leave");
+      error.status = 403;
+      return next(error);
+    }
+
+    const updatedStudy = await Study.findByIdAndUpdate(
+      studyId,
+      { $pull: { members: userId } },
+      { new: true, session }
+    );
+
+    if (!updatedStudy) {
+      const error = new Error("Study not found");
+      error.status = 404;
+      return next(error);
+    }
+
+    await StudyRequest.findOneAndDelete(
+      { userId, studyId },
+      { new: true, session }
+    );
+
+    res.status(200).json({ message: "Success leave study" });
+    return next();
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = studyController;
