@@ -1,6 +1,8 @@
 const express = require("express");
 const router = express.Router();
 
+const { startTx, endTx } = require("../middlewares/transaction");
+
 const authController = require("../controllers/auth.controller");
 const friendRequestController = require("../controllers/friendRequest.controller");
 
@@ -22,7 +24,9 @@ router.get(
 router.post(
   "/",
   authController.findUserByToken,
-  friendRequestController.sendFriendRequest
+  startTx,
+  friendRequestController.sendFriendRequest,
+  endTx
 );
 
 // friend-request를 수락

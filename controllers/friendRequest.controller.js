@@ -35,23 +35,32 @@ friendRequestController.getSendFriendRequsets = async (req, res) => {
   }
 };
 
-friendRequestController.sendFriendRequest = async (req, res) => {
+friendRequestController.sendFriendRequest = async (req, res, next) => {
   try {
+    const session = req.dbSession;
     const userId = req.user._id;
     const { friendName } = req.body;
 
     const friend = await User.findOne({ name: friendName });
 
     if (!friend) {
-      return res.status(400).json({ error: "Invalied friend name" });
+      const error = new Error("Friend not found");
+      error.status = 404;
+      return next(error);
     }
 
-    const friendRequest = await FriendRequest.create({
-      from: userId,
-      to: friend._id,
-    });
+    await FriendRequest.create(
+      [
+        {
+          from: userId,
+          to: friend._id,
+        },
+      ],
+      { session }
+    );
 
-    return res.status(200).json({ message: "Success send friend request" });
+    res.status(200).json({ message: "Success send friend request" });
+    return next();
   } catch (error) {
     return next(error);
   }
