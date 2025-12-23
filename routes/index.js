@@ -8,7 +8,6 @@ const friendRequestApi = require("./friendRequest.api");
 const friendApi = require("./friend.api");
 const studyApi = require("./study.api");
 const studyRequestApi = require("./studyRequest.api");
-const memberApi = require("./member.api");
 
 const router = express.Router();
 
@@ -20,6 +19,5 @@ router.use("/friend-request", friendRequestApi);
 router.use("/friend", friendApi);
 router.use("/study", studyApi);
 router.use("/study-request", studyRequestApi);
-router.use("/member", memberApi);
 
 module.exports = router;
