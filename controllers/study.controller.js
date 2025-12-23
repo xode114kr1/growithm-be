@@ -56,11 +56,13 @@ studyController.createStudy = async (req, res, next) => {
       { session }
     );
 
-    await Promise.all(
-      (members ?? [])?.map((item) =>
-        StudyRequest.create([{ studyId: study._id, userId: item }], { session })
-      )
-    );
+    if (members && members.length > 0) {
+      for (const memberId of members) {
+        await StudyRequest.create([{ studyId: study._id, userId: memberId }], {
+          session,
+        });
+      }
+    }
 
     const studyId = study._id;
 
