@@ -33,7 +33,9 @@ router.post(
 router.post(
   "/:requestId/accept",
   authController.findUserByToken,
-  friendRequestController.acceptFriendRequest
+  startTx,
+  friendRequestController.acceptFriendRequest,
+  endTx
 );
 
 // friend-request를 거절
