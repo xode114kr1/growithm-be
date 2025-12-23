@@ -33,6 +33,6 @@ router.patch(
   endTx
 );
 
-router.post("/share", problemController.shareProblemToStudys);
+router.post("/share", startTx, problemController.shareProblemToStudys, endTx);
 
 module.exports = router;
