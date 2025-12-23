@@ -51,7 +51,9 @@ router.delete(
 router.delete(
   "/:requestId/cancel",
   authController.findUserByToken,
-  friendRequestController.cancelFriendRequest
+  startTx,
+  friendRequestController.cancelFriendRequest,
+  endTx
 );
 
 module.exports = router;

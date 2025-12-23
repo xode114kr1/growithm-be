@@ -86,27 +86,26 @@ friendRequestController.acceptFriendRequest = async (req, res, next) => {
       return next(error);
     }
 
-    const [updatedUser, updatedFriend] = await Promise.all([
-      User.findByIdAndUpdate(
-        userId,
-        { $addToSet: { friends: friendRequest.from } },
-        { new: true, session }
-      ),
-      User.findByIdAndUpdate(
-        friendRequest.from,
-        { $addToSet: { friends: userId } },
-        { new: true, session }
-      ),
-    ]);
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $addToSet: { friends: friendRequest.from } },
+      { new: true, session }
+    );
 
-    if (!updatedFriend) {
-      const error = new Error("Friend not found");
+    const updatedFriend = await User.findByIdAndUpdate(
+      friendRequest.from,
+      { $addToSet: { friends: userId } },
+      { new: true, session }
+    );
+
+    if (!updatedUser) {
+      const error = new Error("User not found");
       error.status = 404;
       return next(error);
     }
 
-    if (!updatedUser) {
-      const error = new Error("User not found");
+    if (!updatedFriend) {
+      const error = new Error("Friend not found");
       error.status = 404;
       return next(error);
     }
@@ -150,24 +149,30 @@ friendRequestController.rejectFriendRequest = async (req, res, next) => {
   }
 };
 
-friendRequestController.cancelFriendRequest = async (req, res) => {
+friendRequestController.cancelFriendRequest = async (req, res, next) => {
   try {
+    const session = req.dbSession;
     const userId = req.user._id;
     const { requestId } = req.params;
 
     const friendRequest = await FriendRequest.findById(requestId);
 
-    if (userId.toString() != friendRequest.from.toString()) {
-      return res
-        .status(401)
-        .json({ error: "is not matched user at friendRequest" });
+    if (!friendRequest) {
+      const error = new Error("Friend-request not found");
+      error.status = 404;
+      return next(error);
     }
 
-    await FriendRequest.findByIdAndDelete(requestId);
+    if (userId.toString() != friendRequest.from.toString()) {
+      const error = new Error("Friend-request not match user-id");
+      error.status = 401;
+      return next(error);
+    }
 
-    return res.status(200).json({
-      message: "Success to cancel friend request",
-    });
+    await FriendRequest.findByIdAndDelete(requestId, { session });
+
+    res.status(200).json({ message: "Success to cancel friend request" });
+    return next();
   } catch (error) {
     return next(error);
   }
