@@ -5,31 +5,54 @@ const StudyUserScore = require("../models/StudyUserScore");
 
 const memberController = {};
 
-memberController.deleteStudyMemberById = async (req, res) => {
+// memberId로 study에서 member 삭제
+memberController.deleteStudyMemberById = async (req, res, next) => {
   try {
-    const { studyId, deleteUserId } = req.query;
+    const session = req.dbSession;
+    const { memberId, studyId } = req.params;
 
-    await StudyRequest.findOneAndDelete({ studyId, userId: deleteUserId });
+    const deleteStudyRequest = await StudyRequest.findOneAndDelete(
+      { studyId, userId: memberId },
+      { session }
+    );
+
+    if (!deleteStudyRequest) {
+      const error = new Error("Study-request not found");
+      error.status = 404;
+      return next(error);
+    }
 
     const updatedStudy = await Study.findByIdAndUpdate(
       studyId,
-      { $pull: { members: deleteUserId } },
-      { new: true }
+      { $pull: { members: memberId } },
+      { new: true, session }
     );
 
     if (!updatedStudy) {
-      throw new Error("Study를 찾을 수 없습니다.");
+      const error = new Error("Study not found");
+      error.status = 404;
+      return next(error);
     }
 
-    await StudyUserScore.findOneAndDelete({
-      user: deleteUserId,
-      study: studyId,
-    });
+    const deleteStudyUserScore = await StudyUserScore.findOneAndDelete(
+      {
+        user: memberId,
+        study: studyId,
+      },
+      { session }
+    );
 
-    return res.status(200).json({ message: "Success delete member" });
+    // todo : user 생성 시 score를 하는 코드 구현 시 주석 풀기
+    // if (!deleteStudyUserScore) {
+    //   const error = new Error("Study-user-score not found");
+    //   error.status = 404;
+    //   return next(error);
+    // }
+
+    res.status(200).json({ message: "Success delete member" });
+    return next();
   } catch (error) {
-    console.log(error.message);
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 
