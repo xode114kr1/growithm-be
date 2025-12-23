@@ -37,7 +37,6 @@ app.use(async (err, req, res, next) => {
       await session.abortTransaction();
     }
   } catch (_) {
-    // ignore
   } finally {
     if (session) {
       await session.endSession().catch(() => {});
@@ -45,7 +44,8 @@ app.use(async (err, req, res, next) => {
     req.dbSession = null;
   }
 
-  const status = err.statusCode || 500;
+  const status = err.status || 500;
+
   return res.status(status).json({ error: err.message || "Server Error" });
 });
 
