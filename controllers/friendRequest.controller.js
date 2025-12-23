@@ -121,28 +121,30 @@ friendRequestController.acceptFriendRequest = async (req, res, next) => {
   }
 };
 
-friendRequestController.rejectFriendRequest = async (req, res) => {
+friendRequestController.rejectFriendRequest = async (req, res, next) => {
   try {
+    const session = req.dbSession;
     const userId = req.user._id;
     const { requestId } = req.params;
 
     const friendRequest = await FriendRequest.findById(requestId);
 
     if (!friendRequest) {
-      return res.status(404).json({ error: "Friend request not found" });
+      const error = new Error("Friend-request not found");
+      error.status = 404;
+      return next(error);
     }
 
     if (userId.toString() != friendRequest.to.toString()) {
-      return res
-        .status(401)
-        .json({ error: "is not matched user at friendRequest" });
+      const error = new Error("Friend-request not match user-id");
+      error.status = 401;
+      return next(error);
     }
 
-    await FriendRequest.findByIdAndDelete(requestId);
+    await FriendRequest.findByIdAndDelete(requestId, { session });
 
-    return res.status(200).json({
-      message: "Success to reject friend request",
-    });
+    res.status(200).json({ message: "Success to reject friend request" });
+    return next();
   } catch (error) {
     return next(error);
   }

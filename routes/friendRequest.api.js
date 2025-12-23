@@ -42,7 +42,9 @@ router.post(
 router.delete(
   "/:requestId/reject",
   authController.findUserByToken,
-  friendRequestController.rejectFriendRequest
+  startTx,
+  friendRequestController.rejectFriendRequest,
+  endTx
 );
 
 // friend-request를 취소
