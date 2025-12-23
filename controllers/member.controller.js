@@ -6,7 +6,7 @@ const StudyUserScore = require("../models/StudyUserScore");
 const memberController = {};
 
 // memberId로 study에서 member 삭제
-memberController.deleteStudyMemberById = async (req, res, next) => {
+memberController.kickStudyMemberById = async (req, res, next) => {
   try {
     const session = req.dbSession;
     const { memberId, studyId } = req.params;
@@ -33,21 +33,6 @@ memberController.deleteStudyMemberById = async (req, res, next) => {
       error.status = 404;
       return next(error);
     }
-
-    const deleteStudyUserScore = await StudyUserScore.findOneAndDelete(
-      {
-        user: memberId,
-        study: studyId,
-      },
-      { session }
-    );
-
-    // todo : user 생성 시 score를 하는 코드 구현 시 주석 풀기
-    // if (!deleteStudyUserScore) {
-    //   const error = new Error("Study-user-score not found");
-    //   error.status = 404;
-    //   return next(error);
-    // }
 
     res.status(200).json({ message: "Success delete member" });
     return next();

@@ -33,7 +33,7 @@ router.delete(
   authController.findUserByToken,
   requireStudyOwner,
   startTx,
-  memberController.deleteStudyMemberById,
+  memberController.kickStudyMemberById,
   endTx
 );
 
