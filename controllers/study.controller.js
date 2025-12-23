@@ -14,7 +14,7 @@ studyController.getStudyList = async (req, res) => {
       .status(201)
       .json({ message: "Success to find study list", data: studyList });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 
@@ -34,42 +34,50 @@ studyController.getStudyById = async (req, res) => {
 
     return res.status(200).json({ message: "Success find study", data: study });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 
-studyController.createStudy = async (req, res) => {
+studyController.createStudy = async (req, res, next) => {
   try {
+    const session = req.dbSession;
     const userId = req.user._id;
     const { title, explanation, members } = req.body;
 
-    const study = await Study.create({
-      title,
-      explanation,
-      owner: userId,
-      members: [userId],
-    });
+    const [study] = await Study.create(
+      [
+        {
+          title,
+          explanation,
+          owner: userId,
+          members: [userId],
+        },
+      ],
+      { session }
+    );
 
-    members?.map(async (item) => {
-      const studyRequest = await StudyRequest.create({
-        studyId: study?._id,
-        userId: item,
-      });
-      if (!studyRequest) {
-        return res.status(404).json({ error: "cannot create study request" });
-      }
-    });
+    await Promise.all(
+      (members ?? [])?.map((item) =>
+        StudyRequest.create([{ studyId: study._id, userId: item }], { session })
+      )
+    );
 
-    return res.status(200).json({
-      message: "Success",
-      data: { title, explanation, members, userId },
-    });
+    const studyId = study._id;
+
+    await StudyUserScore.findOneAndUpdate(
+      { user: userId, study: studyId },
+      { $setOnInsert: { user: userId, study: studyId, score: 0 } },
+      { upsert: true, new: true, session }
+    );
+
+    res.status(200).json({ message: "Success create study" });
+    return next();
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 
-studyController.getStudyUserScoreById = async (req, res) => {
+studyController.getStudyUserScoreById = async (req, res, next) => {
   try {
     const { studyId } = req.params;
     const studyUserScoreList = await StudyUserScore.find({
@@ -79,22 +87,24 @@ studyController.getStudyUserScoreById = async (req, res) => {
       .status(201)
       .json({ message: "success", data: studyUserScoreList });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 
-studyController.deleteStudyById = async (req, res) => {
+studyController.deleteStudyById = async (req, res, next) => {
   try {
-    const userId = req.user._id;
     const { studyId } = req.params;
 
     const deleteStudy = await Study.findByIdAndDelete(studyId);
+
     if (!deleteStudy) {
-      return res.status(400).json({ error: "Fail to delete study" });
+      const error = new Error("Study not found");
+      error.status = 404;
+      return next(error);
     }
     return res.status(200).json({ message: "Success delete study" });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 

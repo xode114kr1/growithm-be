@@ -5,31 +5,33 @@ const StudyUserScore = require("../models/StudyUserScore");
 
 const memberController = {};
 
-memberController.deleteStudyMemberById = async (req, res) => {
+// memberId로 study에서 member 삭제
+memberController.kickStudyMemberById = async (req, res, next) => {
   try {
-    const { studyId, deleteUserId } = req.query;
+    const session = req.dbSession;
+    const { memberId, studyId } = req.params;
 
-    await StudyRequest.findOneAndDelete({ studyId, userId: deleteUserId });
+    await StudyRequest.findOneAndDelete(
+      { studyId, userId: memberId },
+      { session }
+    );
 
     const updatedStudy = await Study.findByIdAndUpdate(
       studyId,
-      { $pull: { members: deleteUserId } },
-      { new: true }
+      { $pull: { members: memberId } },
+      { new: true, session }
     );
 
     if (!updatedStudy) {
-      throw new Error("Study를 찾을 수 없습니다.");
+      const error = new Error("Study not found");
+      error.status = 404;
+      return next(error);
     }
 
-    await StudyUserScore.findOneAndDelete({
-      user: deleteUserId,
-      study: studyId,
-    });
-
-    return res.status(200).json({ message: "Success delete member" });
+    res.status(200).json({ message: "Success delete member" });
+    return next();
   } catch (error) {
-    console.log(error.message);
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 

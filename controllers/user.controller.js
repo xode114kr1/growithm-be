@@ -28,7 +28,7 @@ userController.getUserByName = async (req, res) => {
       .status(200)
       .json({ message: "Success find user by name", data: userObj });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 

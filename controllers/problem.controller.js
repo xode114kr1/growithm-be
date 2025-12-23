@@ -34,7 +34,7 @@ problemController.getProblemListByUserId = async (req, res) => {
     const problems = await Problem.find({ userId });
     return res.status(201).json({ message: "success", data: problems });
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 
@@ -49,11 +49,11 @@ problemController.getProblemById = async (req, res) => {
 
     return res.status(201).json({ message: "success", data: problem });
   } catch (error) {
-    return res.status(400).json({ error: error });
+    return next(error);
   }
 };
 
-problemController.saveSolvedProblem = async (req, res) => {
+problemController.saveSolvedProblem = async (req, res, next) => {
   try {
     const session = req.dbSession;
     const userId = req.user._id;
@@ -68,47 +68,57 @@ problemController.saveSolvedProblem = async (req, res) => {
     problem.memo = memo;
     await problem.save({ session });
 
-    return res.status(200).json({ message: "success" });
+    res.status(200).json({ message: "success" });
+    return next();
   } catch (error) {
-    return res.status(400).json({ error: error });
+    return next(error);
   }
 };
 
-problemController.shareProblemToStudys = async (req, res) => {
+problemController.shareProblemToStudys = async (req, res, next) => {
   try {
+    const session = req.dbSession;
     const { problemId, studyIds } = req.body;
 
     const problem = await Problem.findById(problemId);
     if (!problem) {
-      return res.status(404).json({ error: "cannot find problem" });
+      const err = new Error("Problem not found");
+      err.status = 404;
+      throw err;
     }
 
     const score = exchangeStudyScore(problem.platform, problem.tier);
 
-    await Promise.all(
-      studyIds.map(async (studyId) => {
-        const study = await Study.findById(studyId);
-        if (!study) throw new Error(`cannot find study: ${studyId}`);
+    for (const studyId of studyIds) {
+      const study = await Study.findById(studyId, null, { session });
+      if (!study) {
+        const err = new Error(`Study no found - ${studyId}`);
+        err.status = 404;
+        throw err;
+      }
 
-        const alreadyShared = study.problems.some(
-          (id) => id.toString() === String(problemId)
-        );
-        if (alreadyShared) return;
+      const alreadyShared = study.problems.some(
+        (id) => id.toString() === String(problemId)
+      );
+      if (alreadyShared) continue;
 
-        await StudyUserScore.updateOne(
-          { user: problem.userId, study: study._id },
-          { $inc: { score } },
-          { upsert: true }
-        );
+      await StudyUserScore.updateOne(
+        { user: problem.userId, study: study._id },
+        { $inc: { score } },
+        { upsert: true, session }
+      );
 
-        study.problems.push(problemId);
-        study.score += score;
-        await study.save();
-      })
-    );
-    return res.status(200).json({ message: "success" });
+      await Study.updateOne(
+        { _id: study._id, problems: { $ne: problemId } },
+        { $push: { problems: problemId }, $inc: { score } },
+        { session }
+      );
+    }
+
+    res.status(200).json({ message: "success" });
+    return next();
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 module.exports = problemController;

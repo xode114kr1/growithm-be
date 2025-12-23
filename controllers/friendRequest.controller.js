@@ -15,7 +15,7 @@ friendRequestController.getReceiveFriendRequsets = async (req, res) => {
 
     return res.status(201).json({ message: "Success", data: friends });
   } catch (error) {
-    return res.status(400).json({ error: error });
+    return next(error);
   }
 };
 
@@ -31,116 +31,150 @@ friendRequestController.getSendFriendRequsets = async (req, res) => {
 
     return res.status(201).json({ message: "Success", data: friends });
   } catch (error) {
-    return res.status(400).json({ error: error });
+    return next(error);
   }
 };
 
-friendRequestController.sendFriendRequest = async (req, res) => {
+friendRequestController.sendFriendRequest = async (req, res, next) => {
   try {
+    const session = req.dbSession;
     const userId = req.user._id;
     const { friendName } = req.body;
 
     const friend = await User.findOne({ name: friendName });
 
     if (!friend) {
-      return res.status(400).json({ error: "Invalied friend name" });
+      const error = new Error("Friend not found");
+      error.status = 404;
+      return next(error);
     }
 
-    const friendRequest = await FriendRequest.create({
-      from: userId,
-      to: friend._id,
-    });
+    await FriendRequest.create(
+      [
+        {
+          from: userId,
+          to: friend._id,
+        },
+      ],
+      { session }
+    );
 
-    return res.status(200).json({ message: "Success send friend request" });
+    res.status(200).json({ message: "Success send friend request" });
+    return next();
   } catch (error) {
-    return res.status(400).json({ error: error.message });
+    return next(error);
   }
 };
 
-friendRequestController.acceptFriendRequest = async (req, res) => {
+friendRequestController.acceptFriendRequest = async (req, res, next) => {
   try {
-    const user = req.user;
+    const session = req.dbSession;
     const userId = req.user._id;
     const { requestId } = req.params;
 
     const friendRequest = await FriendRequest.findById(requestId);
 
     if (!friendRequest) {
-      return res.status(404).json({ error: "Friend request not found" });
+      const error = new Error("Friend-request not found");
+      error.status = 404;
+      return next(error);
     }
 
     if (userId.toString() != friendRequest.to.toString()) {
-      return res
-        .status(401)
-        .json({ error: "is not matched user at friendRequest" });
+      const error = new Error("Friend-request not match user-id");
+      error.status = 401;
+      return next(error);
     }
 
-    const friend = await User.findById(friendRequest.from);
-    if (!friend) {
-      return res.status(400).json({ error: "is not existed friend" });
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $addToSet: { friends: friendRequest.from } },
+      { new: true, session }
+    );
+
+    const updatedFriend = await User.findByIdAndUpdate(
+      friendRequest.from,
+      { $addToSet: { friends: userId } },
+      { new: true, session }
+    );
+
+    if (!updatedUser) {
+      const error = new Error("User not found");
+      error.status = 404;
+      return next(error);
+    }
+
+    if (!updatedFriend) {
+      const error = new Error("Friend not found");
+      error.status = 404;
+      return next(error);
     }
 
     friendRequest.state = "accepted";
-    user.friends.push(friend._id);
-    friend.friends.push(userId);
+    await friendRequest.save({ session });
 
-    await Promise.all([friendRequest.save(), user.save(), friend.save()]);
-
-    return res.status(200).json({
-      message: "Success to accept friend request",
-    });
+    res.status(200).json({ message: "Success to accept friend request" });
+    return next();
   } catch (error) {
-    return res.status(400).json({ error: error });
+    return next(error);
   }
 };
 
-friendRequestController.rejectFriendRequest = async (req, res) => {
+friendRequestController.rejectFriendRequest = async (req, res, next) => {
   try {
+    const session = req.dbSession;
     const userId = req.user._id;
     const { requestId } = req.params;
 
     const friendRequest = await FriendRequest.findById(requestId);
 
     if (!friendRequest) {
-      return res.status(404).json({ error: "Friend request not found" });
+      const error = new Error("Friend-request not found");
+      error.status = 404;
+      return next(error);
     }
 
     if (userId.toString() != friendRequest.to.toString()) {
-      return res
-        .status(401)
-        .json({ error: "is not matched user at friendRequest" });
+      const error = new Error("Friend-request not match user-id");
+      error.status = 401;
+      return next(error);
     }
 
-    await FriendRequest.findByIdAndDelete(requestId);
+    await FriendRequest.findByIdAndDelete(requestId, { session });
 
-    return res.status(200).json({
-      message: "Success to reject friend request",
-    });
+    res.status(200).json({ message: "Success to reject friend request" });
+    return next();
   } catch (error) {
-    return res.status(400).json({ error: error });
+    return next(error);
   }
 };
 
-friendRequestController.cancelFriendRequest = async (req, res) => {
+friendRequestController.cancelFriendRequest = async (req, res, next) => {
   try {
+    const session = req.dbSession;
     const userId = req.user._id;
     const { requestId } = req.params;
 
     const friendRequest = await FriendRequest.findById(requestId);
 
-    if (userId.toString() != friendRequest.from.toString()) {
-      return res
-        .status(401)
-        .json({ error: "is not matched user at friendRequest" });
+    if (!friendRequest) {
+      const error = new Error("Friend-request not found");
+      error.status = 404;
+      return next(error);
     }
 
-    await FriendRequest.findByIdAndDelete(requestId);
+    if (userId.toString() != friendRequest.from.toString()) {
+      const error = new Error("Friend-request not match user-id");
+      error.status = 401;
+      return next(error);
+    }
 
-    return res.status(200).json({
-      message: "Success to cancel friend request",
-    });
+    await FriendRequest.findByIdAndDelete(requestId, { session });
+
+    res.status(200).json({ message: "Success to cancel friend request" });
+    return next();
   } catch (error) {
-    return res.status(400).json({ error: error });
+    return next(error);
   }
 };
 

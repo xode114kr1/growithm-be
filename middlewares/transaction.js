@@ -8,7 +8,6 @@ async function startTx(req, res, next) {
 }
 
 async function endTx(req, res, next) {
-  console.log("endTx");
   const session = req.dbSession;
   if (!session) return next();
 
