@@ -77,7 +77,7 @@ studyController.createStudy = async (req, res, next) => {
   }
 };
 
-studyController.getStudyUserScoreById = async (req, res) => {
+studyController.getStudyUserScoreById = async (req, res, next) => {
   try {
     const { studyId } = req.params;
     const studyUserScoreList = await StudyUserScore.find({
