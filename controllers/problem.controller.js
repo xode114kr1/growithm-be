@@ -5,10 +5,11 @@ const { exchangeStudyScore } = require("../utils/score");
 
 const problemController = {};
 
-problemController.getProblemList = async (req, res) => {
+problemController.getProblemList = async (req, res, next) => {
   try {
-    const page = req.query.page ?? 1;
-    const size = req.query.size ?? 10;
+    const page = parseInt(req.query.page ?? "1");
+    const size = parseInt(req.query.size ?? "10");
+
     const { platform, tier, title, state } = req.query;
     const userId = req.user._id;
 
@@ -18,12 +19,24 @@ problemController.getProblemList = async (req, res) => {
     if (title) filter.title = { $regex: title, $options: "i" };
     if (state) filter.state = state;
 
+    const total = await Problem.countDocuments(filter);
+
+    const totalPages = Math.ceil(total / size);
+
     const problemList = await Problem.find(filter)
+      .sort({ _id: -1 })
       .skip((page - 1) * size)
       .limit(size);
-    res.status(201).json({ data: problemList });
+
+    return res.status(201).json({
+      message: "Success get problem list",
+      data: problemList,
+      page,
+      total,
+      totalPages,
+    });
   } catch (error) {
-    res.status(400).json({ error: error });
+    next(error);
   }
 };
 
