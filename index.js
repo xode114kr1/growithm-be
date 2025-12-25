@@ -10,9 +10,17 @@ const PORT = process.env.PORT || 4000;
 const mongoURI = process.env.LOCAL_DB_ADDRESS;
 const app = express();
 
+const allow = new Set([
+  "https://growithm.netlify.app",
+  "http://localhost:5173",
+]);
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
+    origin: (origin, cb) => {
+      if (!origin) return cb(null, true);
+      cb(null, allow.has(origin));
+    },
     credentials: true,
   })
 );
