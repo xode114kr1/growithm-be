@@ -5,7 +5,8 @@ const userController = {};
 userController.logout = async (req, res) => {
   const cookieOptions = {
     httpOnly: true,
-    secure: false,
+    secure: true,
+    sameSite: "none",
     path: "/",
   };
 
