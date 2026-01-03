@@ -10,6 +10,8 @@ const PORT = process.env.PORT || 4000;
 const mongoURI = process.env.LOCAL_DB_ADDRESS;
 const app = express();
 
+app.set("trust proxy", 1);
+
 const allow = new Set([
   "https://growithm.netlify.app",
   "http://localhost:5173",
