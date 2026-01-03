@@ -23,8 +23,6 @@ userController.getUserByName = async (req, res, next) => {
 
     const userObj = user.toObject();
 
-    delete userObj.githubAccessToken;
-
     return res
       .status(200)
       .json({ message: "Success find user by name", data: userObj });
