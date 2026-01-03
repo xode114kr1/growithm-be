@@ -1,6 +1,7 @@
 const axios = require("axios");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const { encryptToken } = require("../utils/tokenCrypto");
 
 const authController = {};
 
@@ -56,18 +57,19 @@ authController.findOrCreateUser = async (req, res, next) => {
     const githubUser = req.githubUser;
     const githubAccessToken = req.githubAccessToken;
 
-    // Todo : githubAccessToken 암호화 (bycryptjs 사용 예정)
+    const encrypted = encryptToken(githubAccessToken);
+
     let user = await User.findOne({ githubId: githubUser.id });
 
     if (!user) {
       user = await User.create({
         githubId: githubUser.id,
-        githubAccessToken: githubAccessToken,
+        githubAccessToken: encrypted,
         name: githubUser.name || githubUser.login,
         avatarUrl: githubUser.avatar_url,
       });
     } else {
-      user.githubAccessToken = githubAccessToken;
+      user.githubAccessToken = encrypted;
       user.name = githubUser.name || githubUser.login;
       user.avatarUrl = githubUser.avatar_url;
       await user.save();

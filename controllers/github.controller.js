@@ -6,6 +6,7 @@ const {
   parseProgrammersReadme,
 } = require("../utils/parsing");
 const Problem = require("../models/Problem");
+const { decryptToken } = require("../utils/tokenCrypto");
 
 const flatformMap = { 백준: "beakjoon", 프로그래머스: "programmers" };
 
@@ -19,7 +20,8 @@ githubController.webhookChaining = async (req, res) => {
 
   const user = req.user;
 
-  const githubAccessToken = user.githubAccessToken;
+  const encrypted = user.githubAccessToken;
+  const githubAccessToken = decryptToken(encrypted);
   const githubApiUrl = `https://api.github.com/repos/${owner}/${repo}/hooks`;
 
   const payload = {
