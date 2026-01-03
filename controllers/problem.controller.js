@@ -10,7 +10,7 @@ problemController.getProblemList = async (req, res, next) => {
     const page = parseInt(req.query.page ?? "1");
     const size = parseInt(req.query.size ?? "10");
 
-    const { platform, tier, title, state } = req.query;
+    const { platform, tier, title, state, startDate, endDate } = req.query;
     const userId = req.user._id;
 
     const filter = { userId };
@@ -18,6 +18,13 @@ problemController.getProblemList = async (req, res, next) => {
     if (tier) filter.tier = { $regex: tier, $options: "i" };
     if (title) filter.title = { $regex: title, $options: "i" };
     if (state) filter.state = state;
+
+    if (startDate || endDate) {
+      filter.timestamp = {};
+
+      if (startDate) filter.timestamp.$gte = startDate;
+      if (endDate) filter.timestamp.$lte = endDate;
+    }
 
     const total = await Problem.countDocuments(filter);
 
