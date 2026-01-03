@@ -11,7 +11,9 @@ scoreController.addScore = async (req, res, next) => {
   try {
     const problem = await Problem.findById(problemId);
     if (!problem) {
-      return res.status(404).json({ error: "cannot find problem" });
+      const error = new Error("Problem not found");
+      error.status = 404;
+      return next(error);
     }
 
     const score = exchangeStudyScore(problem.platform, problem.tier);
