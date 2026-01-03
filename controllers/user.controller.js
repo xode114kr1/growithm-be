@@ -2,7 +2,7 @@ const User = require("../models/User");
 
 const userController = {};
 
-userController.logout = async (req, res) => {
+userController.logout = async (req, res, next) => {
   const cookieOptions = {
     httpOnly: true,
     secure: true,
@@ -16,14 +16,12 @@ userController.logout = async (req, res) => {
   return res.json({ message: "logout" });
 };
 
-userController.getUserByName = async (req, res) => {
+userController.getUserByName = async (req, res, next) => {
   try {
     const { name } = req.query;
     const user = await User.findOne({ name });
 
     const userObj = user.toObject();
-
-    delete userObj.githubAccessToken;
 
     return res
       .status(200)

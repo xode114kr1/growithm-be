@@ -12,10 +12,12 @@ const flatformMap = { 백준: "beakjoon", 프로그래머스: "programmers" };
 
 const githubController = {};
 
-githubController.webhookChaining = async (req, res) => {
+githubController.webhookChaining = async (req, res, next) => {
   const { owner, repo } = req.body;
   if (!owner | !repo) {
-    return res.status(400).json({ message: "repoFullName is required" });
+    const error = new Error("RepoFullName is required");
+    error.status = 400;
+    return next(error);
   }
 
   const user = req.user;
@@ -42,7 +44,9 @@ githubController.webhookChaining = async (req, res) => {
   });
 
   if (!githubRes) {
-    return res.status(400).json({ message: "Fail to chaining webhook" });
+    const error = new Error("Fail to chaining webhook");
+    error.status = 400;
+    return next(error);
   }
 
   user.repo = repo;
@@ -69,7 +73,7 @@ githubController.webhookReceive = async (req, res, next) => {
   next();
 };
 
-githubController.savePendingData = async (req, res) => {
+githubController.savePendingData = async (req, res, next) => {
   const timestamp = req.timestamp;
   const repoFullName = req.repoFullName;
   const githubSenderId = req.githubSenderId;
@@ -92,7 +96,9 @@ githubController.savePendingData = async (req, res) => {
   } else if (platform == "programmers") {
     newPending = parseProgrammersReadme(readmd);
   } else {
-    return res.status(400).json({ error: "Cannot find platform" });
+    const error = new Error("Platform not found");
+    error.status = 404;
+    return next(error);
   }
 
   newPending.code = code;
@@ -103,9 +109,9 @@ githubController.savePendingData = async (req, res) => {
   const user = await User.findOne({ githubId: githubSenderId });
 
   if (!user) {
-    return res
-      .status(401)
-      .json({ message: "GitHub access token not found for this user" });
+    const error = new Error("GitHub access token not found for this user");
+    error.status = 404;
+    return next(error);
   }
 
   newPending.userId = user._id;

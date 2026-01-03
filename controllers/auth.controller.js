@@ -13,7 +13,9 @@ authController.exchangeToken = async (req, res, next) => {
     const { code } = req.body;
 
     if (!code) {
-      return res.status(400).json({ error: "code is required" });
+      const error = new Error("Code is required");
+      error.status = 400;
+      return next(error);
     }
 
     const tokenResponse = await axios.post(
@@ -31,10 +33,9 @@ authController.exchangeToken = async (req, res, next) => {
     const accessToken = tokenResponse.data.access_token;
 
     if (!accessToken) {
-      return res.status(400).json({
-        message: "Failed to get GitHub access token",
-        debug: tokenResponse.data,
-      });
+      const error = new Error("Failed to get GitHub access token");
+      error.status = 400;
+      return next(error);
     }
 
     const userResponse = await axios.get("https://api.github.com/user", {
@@ -48,7 +49,7 @@ authController.exchangeToken = async (req, res, next) => {
     req.githubAccessToken = accessToken;
     next();
   } catch (error) {
-    res.status(400).json({ status: "fail login", error: error.message });
+    return next(error);
   }
 };
 
@@ -79,11 +80,11 @@ authController.findOrCreateUser = async (req, res, next) => {
 
     next();
   } catch (error) {
-    res.status(400).json({ status: "fail login", error: error.message });
+    return next(error);
   }
 };
 
-authController.issueTokensAndRespond = (req, res) => {
+authController.issueTokensAndRespond = (req, res, next) => {
   const user = req.user;
 
   const accessToken = jwt.sign(
@@ -138,7 +139,7 @@ authController.findUserByToken = async (req, res, next) => {
     req.user = user;
     next();
   } catch (error) {
-    return res.status(401).json({ message: "invalid or expired token" });
+    return next(error);
   }
 };
 

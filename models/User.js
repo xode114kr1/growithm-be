@@ -11,7 +11,11 @@ const userSchema = Schema(
   {
     githubId: { type: String, required: true, unique: true },
     repo: { type: String },
-    githubAccessToken: { type: String, required: true, unique: true },
+    githubAccessToken: {
+      type: String,
+      required: true,
+      unique: true,
+    },
     name: { type: String },
     avatarUrl: { type: String },
     friends: [{ type: Schema.Types.ObjectId, ref: "User" }],
@@ -19,6 +23,13 @@ const userSchema = Schema(
   },
   { timestamps: true }
 );
+
+userSchema.methods.toJSON = function () {
+  const obj = this.toObject();
+  delete obj.githubAccessToken;
+
+  return obj;
+};
 
 const User = mongoose.model("User", userSchema);
 module.exports = User;
