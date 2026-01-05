@@ -4,12 +4,13 @@ const StudyUserScore = require("../models/StudyUserScore");
 
 const studyController = {};
 
-studyController.getStudyList = async (req, res) => {
+studyController.getStudyList = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const studyList = await Study.find({ members: userId })
       .populate("members")
       .populate("owner");
+
     return res
       .status(201)
       .json({ message: "Success to find study list", data: studyList });
@@ -18,7 +19,7 @@ studyController.getStudyList = async (req, res) => {
   }
 };
 
-studyController.getStudyById = async (req, res) => {
+studyController.getStudyById = async (req, res, next) => {
   try {
     const { studyId } = req.params;
     const study = await Study.findById(studyId)
@@ -72,7 +73,7 @@ studyController.createStudy = async (req, res, next) => {
       { upsert: true, new: true, session }
     );
 
-    res.status(200).json({ message: "Success create study" });
+    res.status(201).json({ message: "Success create study" });
     return next();
   } catch (error) {
     return next(error);
@@ -82,11 +83,13 @@ studyController.createStudy = async (req, res, next) => {
 studyController.getStudyUserScoreById = async (req, res, next) => {
   try {
     const { studyId } = req.params;
+
     const studyUserScoreList = await StudyUserScore.find({
       study: studyId,
     }).populate("user");
+
     return res
-      .status(201)
+      .status(200)
       .json({ message: "success", data: studyUserScoreList });
   } catch (error) {
     return next(error);

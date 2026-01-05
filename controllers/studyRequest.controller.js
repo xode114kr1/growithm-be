@@ -5,7 +5,7 @@ const User = require("../models/User");
 
 const studyRequestController = {};
 
-studyRequestController.getStudyRequestList = async (req, res) => {
+studyRequestController.getStudyRequestList = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
@@ -16,7 +16,7 @@ studyRequestController.getStudyRequestList = async (req, res) => {
       .populate("studyId")
       .populate("userId");
 
-    return res.status(201).json({
+    return res.status(200).json({
       meeage: "Success to find study request",
       data: studyRequestList,
     });
@@ -25,13 +25,14 @@ studyRequestController.getStudyRequestList = async (req, res) => {
   }
 };
 
-studyRequestController.getSendStudyRequest = async (req, res) => {
+studyRequestController.getSendStudyRequest = async (req, res, next) => {
   try {
     const { studyId } = req.params;
     const studyRequestList = await StudyRequest.find({
       studyId,
       state: "pending",
     }).populate("userId");
+
     return res.status(200).json({
       message: "Success find study request list by study id",
       data: studyRequestList,
@@ -139,7 +140,7 @@ studyRequestController.acceptStudyRequest = async (req, res, next) => {
   }
 };
 
-studyRequestController.rejectStudyRequest = async (req, res) => {
+studyRequestController.rejectStudyRequest = async (req, res, next) => {
   try {
     const { studyRequestId } = req.params;
     await StudyRequest.findByIdAndDelete(studyRequestId);

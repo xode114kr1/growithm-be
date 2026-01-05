@@ -2,7 +2,7 @@ const User = require("../models/User");
 
 const friendController = {};
 
-friendController.getFriendList = async (req, res) => {
+friendController.getFriendList = async (req, res, next) => {
   try {
     const userId = req.user._id;
     const user = await User.findById(userId)
@@ -36,7 +36,6 @@ friendController.deleteFriend = async (req, res, next) => {
     );
 
     res.status(200).json({ message: "Success delete friend" });
-    console.log("df");
     return next();
   } catch (error) {
     return next(error);

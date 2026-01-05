@@ -3,7 +3,7 @@ const User = require("../models/User");
 
 const friendRequestController = {};
 
-friendRequestController.getReceiveFriendRequsets = async (req, res) => {
+friendRequestController.getReceiveFriendRequsets = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
@@ -19,7 +19,7 @@ friendRequestController.getReceiveFriendRequsets = async (req, res) => {
   }
 };
 
-friendRequestController.getSendFriendRequsets = async (req, res) => {
+friendRequestController.getSendFriendRequsets = async (req, res, next) => {
   try {
     const userId = req.user._id;
 
@@ -27,7 +27,11 @@ friendRequestController.getSendFriendRequsets = async (req, res) => {
       .populate("from")
       .populate("to");
 
-    if (!friends) return res.status(401).json({ error: "Cannot find friend" });
+    if (!friends) {
+      const error = new Error("Friend not found");
+      error.status = 404;
+      return next(error);
+    }
 
     return res.status(201).json({ message: "Success", data: friends });
   } catch (error) {
