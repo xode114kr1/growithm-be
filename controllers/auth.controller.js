@@ -117,12 +117,19 @@ authController.issueTokensAndRespond = (req, res, next) => {
   return res.json({
     message: "github login success",
     data: user,
+    accessToken,
+    refreshToken,
   });
 };
 
 authController.findUserByToken = async (req, res, next) => {
   try {
-    const accessToken = req.cookies?.accessToken;
+    const cookieToken = req.cookies?.accessToken ?? null;
+
+    const auth = req.headers.authorization;
+    const headerToken = auth && req.headers?.authorization.split(" ")[1];
+
+    const accessToken = cookieToken || headerToken;
 
     if (!accessToken) {
       return res.status(401).json({ message: "Access token is missing" });
