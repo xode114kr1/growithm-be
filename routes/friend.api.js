@@ -9,6 +9,7 @@ const { startTx, endTx } = require("../middlewares/transaction");
 // me의 friendList를 요청
 router.get(
   "/me",
+  authController.optionalRefresh,
   authController.findUserByToken,
   friendController.getFriendList
 );
@@ -18,6 +19,7 @@ router.get(
 // 2. user의 friends에서 friendId를 삭제
 router.delete(
   "/:friendId",
+  authController.optionalRefresh,
   authController.findUserByToken,
   startTx,
   friendRequestController.deleteFriendRequest,

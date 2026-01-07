@@ -9,6 +9,7 @@ const friendRequestController = require("../controllers/friendRequest.controller
 // me의 send-friend-request 리스트 요청
 router.get(
   "/send/me",
+  authController.optionalRefresh,
   authController.findUserByToken,
   friendRequestController.getSendFriendRequsets
 );
@@ -16,6 +17,7 @@ router.get(
 // me의 receive-friend-request 리스트 요청
 router.get(
   "/receive/me",
+  authController.optionalRefresh,
   authController.findUserByToken,
   friendRequestController.getReceiveFriendRequsets
 );
@@ -23,6 +25,7 @@ router.get(
 // friend-request를 생성
 router.post(
   "/",
+  authController.optionalRefresh,
   authController.findUserByToken,
   startTx,
   friendRequestController.sendFriendRequest,
@@ -32,6 +35,7 @@ router.post(
 // friend-request를 수락
 router.post(
   "/:requestId/accept",
+  authController.optionalRefresh,
   authController.findUserByToken,
   startTx,
   friendRequestController.acceptFriendRequest,
@@ -41,6 +45,7 @@ router.post(
 // friend-request를 거절
 router.delete(
   "/:requestId/reject",
+  authController.optionalRefresh,
   authController.findUserByToken,
   startTx,
   friendRequestController.rejectFriendRequest,
@@ -50,6 +55,7 @@ router.delete(
 // friend-request를 취소
 router.delete(
   "/:requestId/cancel",
+  authController.optionalRefresh,
   authController.findUserByToken,
   startTx,
   friendRequestController.cancelFriendRequest,

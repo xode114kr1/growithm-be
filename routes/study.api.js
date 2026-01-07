@@ -14,6 +14,7 @@ router.get("/user-score/:studyId", studyController.getStudyUserScoreById);
 router.get("/:studyId", studyController.getStudyById);
 router.post(
   "/",
+  authController.optionalRefresh,
   authController.findUserByToken,
   startTx,
   studyController.createStudy,
@@ -23,6 +24,7 @@ router.post(
 // owner가 study-request를 보내는 기능
 router.post(
   "/:studyId/send",
+  authController.optionalRefresh,
   authController.findUserByToken,
   requireStudyOwner,
   startTx,
@@ -33,6 +35,7 @@ router.post(
 // owner가 study를 삭제하는 기능
 router.delete(
   "/:studyId",
+  authController.optionalRefresh,
   authController.findUserByToken,
   requireStudyOwner,
   studyController.deleteStudyById
@@ -41,6 +44,7 @@ router.delete(
 // owner가 study member를 삭제하는 기능
 router.delete(
   "/:studyId/member/:memberId",
+  authController.optionalRefresh,
   authController.findUserByToken,
   requireStudyOwner,
   startTx,
@@ -51,6 +55,7 @@ router.delete(
 // user가 study를 leave하는 기능
 router.delete(
   "/:studyId/leave",
+  authController.optionalRefresh,
   authController.findUserByToken,
   startTx,
   studyController.leaveStudy,

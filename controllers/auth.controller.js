@@ -122,14 +122,59 @@ authController.issueTokensAndRespond = (req, res, next) => {
   });
 };
 
+authController.optionalRefresh = async (req, res, next) => {
+  const cookieToken = req.cookies?.accessToken ?? null;
+
+  const auth = req.headers?.authorization ?? null;
+  const headerToken = auth && req.headers?.authorization.split(" ")[1];
+
+  const accessToken = cookieToken || headerToken;
+
+  if (!accessToken) {
+    const error = new Error("Access token is missing");
+    error.status = 401;
+    return next(error);
+  }
+
+  try {
+    jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
+    req.accessToken = accessToken;
+    return next();
+  } catch (err) {
+    if (err.name !== "TokenExpiredError") return next(err);
+  }
+
+  try {
+    const refreshToken = req.cookies?.refreshToken;
+
+    if (!refreshToken) {
+      const error = new Error("Refresh token is missing");
+      error.status = 401;
+      return next(error);
+    }
+
+    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+
+    const newAccessToken = jwt.sign(
+      { userId: decoded.userId },
+      process.env.JWT_ACCESS_SECRET,
+      {
+        expiresIn: "15m",
+      }
+    );
+
+    req.accessToken = newAccessToken;
+    res.cookie("accessToken", newAccessToken, cookieOptions);
+
+    return next();
+  } catch {
+    return next();
+  }
+};
+
 authController.findUserByToken = async (req, res, next) => {
   try {
-    const cookieToken = req.cookies?.accessToken ?? null;
-
-    const auth = req.headers.authorization;
-    const headerToken = auth && req.headers?.authorization.split(" ")[1];
-
-    const accessToken = cookieToken || headerToken;
+    const accessToken = req.accessToken;
 
     if (!accessToken) {
       return res.status(401).json({ message: "Access token is missing" });
@@ -145,6 +190,18 @@ authController.findUserByToken = async (req, res, next) => {
     const user = await User.findById(userId);
     req.user = user;
     next();
+  } catch (error) {
+    return next(error);
+  }
+};
+
+authController.me = async (req, res, next) => {
+  try {
+    const user = req.user;
+    return res.json({
+      message: "Success reissue new accessToken",
+      data: user,
+    });
   } catch (error) {
     return next(error);
   }

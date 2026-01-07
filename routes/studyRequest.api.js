@@ -7,6 +7,7 @@ const studyRequestController = require("../controllers/studyRequest.controller")
 
 router.get(
   "/",
+  authController.optionalRefresh,
   authController.findUserByToken,
   studyRequestController.getStudyRequestList
 );
@@ -21,6 +22,7 @@ router.get("/send/:studyId", studyRequestController.getSendStudyRequest);
 
 router.post(
   "/:studyRequestId/accept",
+  authController.optionalRefresh,
   authController.findUserByToken,
   startTx,
   studyRequestController.acceptStudyRequest,
