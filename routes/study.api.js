@@ -9,7 +9,12 @@ const studyController = require("../controllers/study.controller");
 const memberController = require("../controllers/member.controller");
 const studyRequestController = require("../controllers/studyRequest.controller");
 
-router.get("/", authController.findUserByToken, studyController.getStudyList);
+router.get(
+  "/",
+  authController.optionalRefresh,
+  authController.findUserByToken,
+  studyController.getStudyList
+);
 router.get("/user-score/:studyId", studyController.getStudyUserScoreById);
 router.get("/:studyId", studyController.getStudyById);
 router.post(
