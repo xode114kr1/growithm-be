@@ -2,13 +2,14 @@ const express = require("express");
 const router = express.Router();
 
 const problemController = require("../controllers/problem.controller");
-const autoController = require("../controllers/auth.controller");
+const authController = require("../controllers/auth.controller");
 const scoreController = require("../controllers/score.controller");
 const { startTx, endTx } = require("../middlewares/transaction");
 
 router.get(
   "/",
-  autoController.findUserByToken,
+  authController.optionalRefresh,
+  authController.findUserByToken,
   problemController.getProblemList
 );
 
@@ -18,7 +19,8 @@ router.get("/:id", problemController.getProblemById);
 
 router.patch(
   "/solved/:id",
-  autoController.findUserByToken,
+  authController.optionalRefresh,
+  authController.findUserByToken,
   startTx,
   scoreController.addScore,
   problemController.saveSolvedProblem,
@@ -27,7 +29,8 @@ router.patch(
 
 router.patch(
   "/edit/:id/",
-  autoController.findUserByToken,
+  authController.optionalRefresh,
+  authController.findUserByToken,
   startTx,
   problemController.saveSolvedProblem,
   endTx
