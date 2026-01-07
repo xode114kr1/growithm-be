@@ -126,7 +126,7 @@ authController.findUserByToken = async (req, res, next) => {
   try {
     const cookieToken = req.cookies?.accessToken ?? null;
 
-    const auth = req.headers.authorization;
+    const auth = req.headers?.authorization ?? null;
     const headerToken = auth && req.headers?.authorization.split(" ")[1];
 
     const accessToken = cookieToken || headerToken;
