@@ -31,6 +31,7 @@ const ProblemSchema = Schema(
 ProblemSchema.index({ userId: 1, _id: -1 });
 ProblemSchema.index({ userId: 1, platform: 1, _id: -1 });
 ProblemSchema.index({ userId: 1, state: 1, _id: -1 });
+ProblemSchema.index({ userId: 1, platform: 1, problemId: 1 }, { unique: true });
 
 const Problem = mongoose.model("Problem", ProblemSchema);
 module.exports = Problem;
