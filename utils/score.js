@@ -6,7 +6,7 @@ const romanToNumber = {
   v: 5,
 };
 
-function exchangeStudyScore(platform, level) {
+function exchangeScore(platform, level) {
   if (!platform) return 0;
 
   const p = String(platform).toLowerCase();
@@ -45,4 +45,4 @@ function exchangeStudyScore(platform, level) {
   return 0;
 }
 
-module.exports = { exchangeStudyScore };
+module.exports = { exchangeScore };

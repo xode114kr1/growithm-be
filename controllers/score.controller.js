@@ -1,5 +1,5 @@
 const Problem = require("../models/Problem");
-const { exchangeStudyScore } = require("../utils/score");
+const { exchangeScore } = require("../utils/score");
 
 const scoreController = {};
 
@@ -16,7 +16,7 @@ scoreController.addScore = async (req, res, next) => {
       return next(error);
     }
 
-    const score = exchangeStudyScore(problem.platform, problem.tier);
+    const score = exchangeScore(problem.platform, problem.tier);
 
     user.score += score;
     await user.save({ session });
