@@ -37,5 +37,5 @@ router.patch(
 );
 
 router.post("/share", startTx, problemController.shareProblemToStudys, endTx);
-
+router.get("/info/:userId", problemController.getProblemInfo);
 module.exports = router;

@@ -1,6 +1,7 @@
 const Problem = require("../models/Problem");
 const Study = require("../models/Study");
 const StudyUserScore = require("../models/StudyUserScore");
+const User = require("../models/User");
 const { inWithinDaysFromToday } = require("../utils/dateUtils");
 const { exchangeScore } = require("../utils/score");
 
@@ -156,4 +157,47 @@ problemController.shareProblemToStudys = async (req, res, next) => {
     return next(error);
   }
 };
+
+problemController.getProblemInfo = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      const error = new Error("User not found");
+      error.status = 404;
+      return next(error);
+    }
+
+    const allProblemCount = await Problem.countDocuments({ userId: user._id });
+    const pendingProblemCount = await Problem.countDocuments({
+      userId: user._id,
+      state: "pending",
+    });
+    const solvedProblemCount = await Problem.countDocuments({
+      userId: user._id,
+      state: "solved",
+    });
+    const today = new Date();
+    const formattedDate = today.toISOString().slice(0, 10);
+
+    const todayProblemCount = await Problem.countDocuments({
+      userId: user._id,
+      timestamp: formattedDate,
+    });
+
+    return res.status(200).json({
+      message: "Success",
+      data: {
+        allProblemCount,
+        pendingProblemCount,
+        solvedProblemCount,
+        todayProblemCount,
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 module.exports = problemController;
