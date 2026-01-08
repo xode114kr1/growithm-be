@@ -195,6 +195,24 @@ authController.findUserByToken = async (req, res, next) => {
   }
 };
 
+authController.hasAccessToken = async (req, res, next) => {
+  try {
+    const cookieToken = req.cookies?.accessToken ?? null;
+
+    const auth = req.headers?.authorization ?? null;
+    const headerToken = auth && req.headers?.authorization.split(" ")[1];
+
+    const accessToken = cookieToken || headerToken;
+
+    if (!accessToken) {
+      return res.status(401).json({ message: "Access token is missing" });
+    }
+    next();
+  } catch (error) {
+    return next(error);
+  }
+};
+
 authController.me = async (req, res, next) => {
   try {
     const user = req.user;
