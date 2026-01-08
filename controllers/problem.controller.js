@@ -1,6 +1,7 @@
 const Problem = require("../models/Problem");
 const Study = require("../models/Study");
 const StudyUserScore = require("../models/StudyUserScore");
+const { inWithinDaysFromToday } = require("../utils/dateUtils");
 const { exchangeScore } = require("../utils/score");
 
 const problemController = {};
@@ -117,10 +118,14 @@ problemController.shareProblemToStudys = async (req, res, next) => {
       return next(error);
     }
 
-    const score = exchangeScore(problem.platform, problem.tier);
+    let score = 0;
+    if (inWithinDaysFromToday(problem.timestamp, 3)) {
+      score = exchangeScore(problem.platform, problem.tier);
+    }
 
     for (const studyId of studyIds) {
       const study = await Study.findById(studyId, null, { session });
+
       if (!study) {
         const error = new Error("Study not found");
         error.status = 404;
