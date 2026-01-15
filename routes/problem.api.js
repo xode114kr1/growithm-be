@@ -15,6 +15,13 @@ router.get(
 
 router.get("/list/:userId", problemController.getProblemListByUserId);
 
+router.get(
+  "/tier-stats",
+  authController.optionalRefresh,
+  authController.findUserByToken,
+  problemController.getProblemTierStats
+);
+
 router.get("/:id", problemController.getProblemById);
 
 router.patch(
@@ -38,4 +45,5 @@ router.patch(
 
 router.post("/share", startTx, problemController.shareProblemToStudys, endTx);
 router.get("/info/:userId", problemController.getProblemInfo);
+
 module.exports = router;
