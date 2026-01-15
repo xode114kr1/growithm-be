@@ -200,4 +200,103 @@ problemController.getProblemInfo = async (req, res, next) => {
   }
 };
 
+problemController.getProblemTierStats = async (req, res, next) => {
+  try {
+    const user = req.user;
+
+    const rows = await Problem.aggregate([
+      { $match: { userId: user._id } },
+
+      {
+        $addFields: {
+          tierGroup: {
+            $switch: {
+              branches: [
+                {
+                  case: {
+                    $regexMatch: {
+                      input: "$tier",
+                      regex: /^(Bronze|level\s*1)/i,
+                    },
+                  },
+                  then: "bronze",
+                },
+                {
+                  case: {
+                    $regexMatch: {
+                      input: "$tier",
+                      regex: /^(Silver|level\s*2)/i,
+                    },
+                  },
+                  then: "silver",
+                },
+                {
+                  case: {
+                    $regexMatch: {
+                      input: "$tier",
+                      regex: /^(Gold|level\s*3)/i,
+                    },
+                  },
+                  then: "gold",
+                },
+                {
+                  case: {
+                    $regexMatch: {
+                      input: "$tier",
+                      regex: /^(Platinum|level\s*4)/i,
+                    },
+                  },
+                  then: "platinum",
+                },
+                {
+                  case: { $regexMatch: { input: "$tier", regex: /^Diamond/i } },
+                  then: "diamond",
+                },
+                {
+                  case: { $regexMatch: { input: "$tier", regex: /^Ruby/i } },
+                  then: "ruby",
+                },
+              ],
+              default: "unknown",
+            },
+          },
+        },
+      },
+
+      {
+        $group: {
+          _id: "$tierGroup",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const counter = {
+      bronze: 0,
+      silver: 0,
+      gold: 0,
+      platinum: 0,
+      diamond: 0,
+      ruby: 0,
+    };
+
+    for (const row of rows) {
+      if (counter[row._id] !== undefined) {
+        counter[row._id] = row.count;
+      }
+    }
+
+    const tierStats = [
+      { name: "bronze / level 1", value: counter.bronze },
+      { name: "silver / level 2", value: counter.silver },
+      { name: "gold / level 3", value: counter.gold },
+      { name: "platinum / level 4", value: counter.platinum },
+      { name: "diamond", value: counter.diamond },
+      { name: "ruby", value: counter.ruby },
+    ];
+    return res.status(200).json({ message: "Success", data: tierStats });
+  } catch (error) {
+    next(error);
+  }
+};
 module.exports = problemController;
