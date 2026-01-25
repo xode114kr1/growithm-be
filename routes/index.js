@@ -13,7 +13,7 @@ const router = express.Router();
 
 router.use("/github", githubApi);
 router.use("/auth", authApi);
-router.use("/user", userApi);
+router.use("/users", userApi);
 router.use("/problem", problemApi);
 router.use("/friend-request", friendRequestApi);
 router.use("/friend", friendApi);
