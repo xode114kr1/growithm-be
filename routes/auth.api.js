@@ -4,6 +4,7 @@ const authController = require("../controllers/auth.controller");
 
 router.get(
   "/me",
+  authController.hasAccessToken,
   authController.optionalRefresh,
   authController.findUserByToken,
   authController.issueTokensAndRespond

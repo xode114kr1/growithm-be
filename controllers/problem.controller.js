@@ -1,7 +1,9 @@
 const Problem = require("../models/Problem");
 const Study = require("../models/Study");
 const StudyUserScore = require("../models/StudyUserScore");
-const { exchangeStudyScore } = require("../utils/score");
+const User = require("../models/User");
+const { inWithinDaysFromToday } = require("../utils/dateUtils");
+const { exchangeScore } = require("../utils/score");
 
 const problemController = {};
 
@@ -117,10 +119,14 @@ problemController.shareProblemToStudys = async (req, res, next) => {
       return next(error);
     }
 
-    const score = exchangeStudyScore(problem.platform, problem.tier);
+    let score = 0;
+    if (inWithinDaysFromToday(problem.timestamp, 3)) {
+      score = exchangeScore(problem.platform, problem.tier);
+    }
 
     for (const studyId of studyIds) {
       const study = await Study.findById(studyId, null, { session });
+
       if (!study) {
         const error = new Error("Study not found");
         error.status = 404;
@@ -149,6 +155,148 @@ problemController.shareProblemToStudys = async (req, res, next) => {
     return next();
   } catch (error) {
     return next(error);
+  }
+};
+
+problemController.getProblemInfo = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      const error = new Error("User not found");
+      error.status = 404;
+      return next(error);
+    }
+
+    const allProblemCount = await Problem.countDocuments({ userId: user._id });
+    const pendingProblemCount = await Problem.countDocuments({
+      userId: user._id,
+      state: "pending",
+    });
+    const solvedProblemCount = await Problem.countDocuments({
+      userId: user._id,
+      state: "solved",
+    });
+    const today = new Date();
+    const formattedDate = today.toISOString().slice(0, 10);
+
+    const todayProblemCount = await Problem.countDocuments({
+      userId: user._id,
+      timestamp: formattedDate,
+    });
+
+    return res.status(200).json({
+      message: "Success",
+      data: {
+        allProblemCount,
+        pendingProblemCount,
+        solvedProblemCount,
+        todayProblemCount,
+      },
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+problemController.getProblemTierStats = async (req, res, next) => {
+  try {
+    const user = req.user;
+
+    const rows = await Problem.aggregate([
+      { $match: { userId: user._id } },
+
+      {
+        $addFields: {
+          tierGroup: {
+            $switch: {
+              branches: [
+                {
+                  case: {
+                    $regexMatch: {
+                      input: "$tier",
+                      regex: /^(Bronze|level\s*1)/i,
+                    },
+                  },
+                  then: "bronze",
+                },
+                {
+                  case: {
+                    $regexMatch: {
+                      input: "$tier",
+                      regex: /^(Silver|level\s*2)/i,
+                    },
+                  },
+                  then: "silver",
+                },
+                {
+                  case: {
+                    $regexMatch: {
+                      input: "$tier",
+                      regex: /^(Gold|level\s*3)/i,
+                    },
+                  },
+                  then: "gold",
+                },
+                {
+                  case: {
+                    $regexMatch: {
+                      input: "$tier",
+                      regex: /^(Platinum|level\s*4)/i,
+                    },
+                  },
+                  then: "platinum",
+                },
+                {
+                  case: { $regexMatch: { input: "$tier", regex: /^Diamond/i } },
+                  then: "diamond",
+                },
+                {
+                  case: { $regexMatch: { input: "$tier", regex: /^Ruby/i } },
+                  then: "ruby",
+                },
+              ],
+              default: "unknown",
+            },
+          },
+        },
+      },
+
+      {
+        $group: {
+          _id: "$tierGroup",
+          count: { $sum: 1 },
+        },
+      },
+    ]);
+
+    const counter = {
+      bronze: 0,
+      silver: 0,
+      gold: 0,
+      platinum: 0,
+      diamond: 0,
+      ruby: 0,
+    };
+
+    for (const row of rows) {
+      if (counter[row._id] !== undefined) {
+        counter[row._id] = row.count;
+      }
+    }
+
+    const tierStats = [
+      { name: "bronze / level 1", value: counter.bronze },
+      { name: "silver / level 2", value: counter.silver },
+      { name: "gold / level 3", value: counter.gold },
+      { name: "platinum / level 4", value: counter.platinum },
+      { name: "diamond", value: counter.diamond },
+      { name: "ruby", value: counter.ruby },
+    ];
+    return res.status(200).json({ message: "Success", data: tierStats });
+  } catch (error) {
+    next(error);
   }
 };
 module.exports = problemController;
