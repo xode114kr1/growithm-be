@@ -12,7 +12,7 @@ studyController.getStudyList = async (req, res, next) => {
       .populate("owner");
 
     return res
-      .status(201)
+      .status(200)
       .json({ message: "Success to find study list", data: studyList });
   } catch (error) {
     return next(error);
@@ -54,7 +54,7 @@ studyController.createStudy = async (req, res, next) => {
           members: [userId],
         },
       ],
-      { session }
+      { session },
     );
 
     if (members && members.length > 0) {
@@ -70,7 +70,7 @@ studyController.createStudy = async (req, res, next) => {
     await StudyUserScore.findOneAndUpdate(
       { user: userId, study: studyId },
       { $setOnInsert: { user: userId, study: studyId, score: 0 } },
-      { upsert: true, new: true, session }
+      { upsert: true, new: true, session },
     );
 
     res.status(201).json({ message: "Success create study" });
@@ -107,7 +107,7 @@ studyController.deleteStudyById = async (req, res, next) => {
       error.status = 404;
       return next(error);
     }
-    return res.status(200).json({ message: "Success delete study" });
+    return res.status(204).json({ message: "Success delete study" });
   } catch (error) {
     return next(error);
   }
@@ -136,7 +136,7 @@ studyController.leaveStudy = async (req, res, next) => {
     const updatedStudy = await Study.findByIdAndUpdate(
       studyId,
       { $pull: { members: userId } },
-      { new: true, session }
+      { new: true, session },
     );
 
     if (!updatedStudy) {
@@ -147,7 +147,7 @@ studyController.leaveStudy = async (req, res, next) => {
 
     await StudyRequest.findOneAndDelete(
       { userId, studyId },
-      { new: true, session }
+      { new: true, session },
     );
 
     res.status(200).json({ message: "Success leave study" });

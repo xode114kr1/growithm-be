@@ -11,7 +11,7 @@ function exchangeScore(platform, level) {
 
   const p = String(platform).toLowerCase();
 
-  if (p === "beakjoon") {
+  if (p === "baekjoon") {
     const parts = String(level).toLowerCase().trim().split(/\s+/);
     if (parts.length < 2) return 0;
 

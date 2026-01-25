@@ -6,60 +6,60 @@ const { startTx, endTx } = require("../middlewares/transaction");
 const authController = require("../controllers/auth.controller");
 const friendRequestController = require("../controllers/friendRequest.controller");
 
-// me의 send-friend-request 리스트 요청
+// 내가 보낸 친구 요청 조회
 router.get(
-  "/send/me",
+  "/me/sent",
   authController.optionalRefresh,
   authController.findUserByToken,
-  friendRequestController.getSendFriendRequsets
+  friendRequestController.getSendFriendRequsets,
 );
 
-// me의 receive-friend-request 리스트 요청
+// 내가 받은 친구 요청 조회
 router.get(
-  "/receive/me",
+  "/me/received",
   authController.optionalRefresh,
   authController.findUserByToken,
-  friendRequestController.getReceiveFriendRequsets
+  friendRequestController.getReceiveFriendRequsets,
 );
 
-// friend-request를 생성
+// 친구 요청 생성
 router.post(
   "/",
   authController.optionalRefresh,
   authController.findUserByToken,
   startTx,
   friendRequestController.sendFriendRequest,
-  endTx
+  endTx,
 );
 
-// friend-request를 수락
-router.post(
+// 친구 요청 수락
+router.patch(
   "/:requestId/accept",
   authController.optionalRefresh,
   authController.findUserByToken,
   startTx,
   friendRequestController.acceptFriendRequest,
-  endTx
+  endTx,
 );
 
-// friend-request를 거절
+// 친구 요청 거절
 router.delete(
   "/:requestId/reject",
   authController.optionalRefresh,
   authController.findUserByToken,
   startTx,
   friendRequestController.rejectFriendRequest,
-  endTx
+  endTx,
 );
 
-// friend-request를 취소
+// 친구 요청 취소
 router.delete(
   "/:requestId/cancel",
   authController.optionalRefresh,
   authController.findUserByToken,
   startTx,
   friendRequestController.cancelFriendRequest,
-  endTx
+  endTx,
 );
 
 module.exports = router;

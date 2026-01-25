@@ -6,7 +6,7 @@ const scoreController = {};
 scoreController.addScore = async (req, res, next) => {
   const session = req.dbSession;
   const user = req.user;
-  const { id: problemId } = req.params;
+  const { problemId } = req.params;
 
   try {
     const problem = await Problem.findById(problemId);

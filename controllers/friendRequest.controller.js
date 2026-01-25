@@ -13,7 +13,7 @@ friendRequestController.getReceiveFriendRequsets = async (req, res, next) => {
 
     if (!friends) return res.status(401).json({ error: "Cannot find friend" });
 
-    return res.status(201).json({ message: "Success", data: friends });
+    return res.status(200).json({ message: "Success", data: friends });
   } catch (error) {
     return next(error);
   }
@@ -33,7 +33,7 @@ friendRequestController.getSendFriendRequsets = async (req, res, next) => {
       return next(error);
     }
 
-    return res.status(201).json({ message: "Success", data: friends });
+    return res.status(200).json({ message: "Success", data: friends });
   } catch (error) {
     return next(error);
   }
@@ -60,10 +60,10 @@ friendRequestController.sendFriendRequest = async (req, res, next) => {
           to: friend._id,
         },
       ],
-      { session }
+      { session },
     );
 
-    res.status(200).json({ message: "Success send friend request" });
+    res.status(201).json({ message: "Success send friend request" });
     return next();
   } catch (error) {
     return next(error);
@@ -93,13 +93,13 @@ friendRequestController.acceptFriendRequest = async (req, res, next) => {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $addToSet: { friends: friendRequest.from } },
-      { new: true, session }
+      { new: true, session },
     );
 
     const updatedFriend = await User.findByIdAndUpdate(
       friendRequest.from,
       { $addToSet: { friends: userId } },
-      { new: true, session }
+      { new: true, session },
     );
 
     if (!updatedUser) {
@@ -117,7 +117,7 @@ friendRequestController.acceptFriendRequest = async (req, res, next) => {
     friendRequest.state = "accepted";
     await friendRequest.save({ session });
 
-    res.status(200).json({ message: "Success to accept friend request" });
+    res.status(204).json({ message: "Success to accept friend request" });
     return next();
   } catch (error) {
     return next(error);
@@ -146,7 +146,7 @@ friendRequestController.rejectFriendRequest = async (req, res, next) => {
 
     await FriendRequest.findByIdAndDelete(requestId, { session });
 
-    res.status(200).json({ message: "Success to reject friend request" });
+    res.status(204).json({ message: "Success to reject friend request" });
     return next();
   } catch (error) {
     return next(error);
@@ -175,7 +175,7 @@ friendRequestController.cancelFriendRequest = async (req, res, next) => {
 
     await FriendRequest.findByIdAndDelete(requestId, { session });
 
-    res.status(200).json({ message: "Success to cancel friend request" });
+    res.status(204).json({ message: "Success to cancel friend request" });
     return next();
   } catch (error) {
     return next(error);
