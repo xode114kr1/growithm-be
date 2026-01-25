@@ -62,7 +62,7 @@ problemController.getProblemListByUserId = async (req, res, next) => {
 
 problemController.getProblemById = async (req, res, next) => {
   try {
-    const { id: problemId } = req.params;
+    const { problemId } = req.params;
     const problem = await Problem.findById(problemId);
 
     if (!problem) {
@@ -81,7 +81,7 @@ problemController.saveSolvedProblem = async (req, res, next) => {
   try {
     const session = req.dbSession;
     const userId = req.user._id;
-    const { id: problemId } = req.params;
+    const { problemId } = req.params;
     const { memo } = req.body;
     let problem = await Problem.findById(problemId).session(session);
 
@@ -100,7 +100,7 @@ problemController.saveSolvedProblem = async (req, res, next) => {
     problem.memo = memo;
     await problem.save({ session });
 
-    res.status(201).json({ message: "success" });
+    res.status(204).json({ message: "success" });
     return next();
   } catch (error) {
     return next(error);
@@ -110,7 +110,8 @@ problemController.saveSolvedProblem = async (req, res, next) => {
 problemController.shareProblemToStudys = async (req, res, next) => {
   try {
     const session = req.dbSession;
-    const { problemId, studyIds } = req.body;
+    const { problemId } = req.params;
+    const { studyIds } = req.body;
 
     const problem = await Problem.findById(problemId);
     if (!problem) {
@@ -134,24 +135,24 @@ problemController.shareProblemToStudys = async (req, res, next) => {
       }
 
       const alreadyShared = study.problems.some(
-        (id) => id.toString() === String(problemId)
+        (id) => id.toString() === String(problemId),
       );
       if (alreadyShared) continue;
 
       await StudyUserScore.updateOne(
         { user: problem.userId, study: study._id },
         { $inc: { score } },
-        { upsert: true, session }
+        { upsert: true, session },
       );
 
       await Study.updateOne(
         { _id: study._id, problems: { $ne: problemId } },
         { $push: { problems: problemId }, $inc: { score } },
-        { session }
+        { session },
       );
     }
 
-    res.status(201).json({ message: "success" });
+    res.status(204).json({ message: "success" });
     return next();
   } catch (error) {
     return next(error);

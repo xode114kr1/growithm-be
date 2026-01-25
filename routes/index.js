@@ -14,7 +14,7 @@ const router = express.Router();
 router.use("/github", githubApi);
 router.use("/auth", authApi);
 router.use("/users", userApi);
-router.use("/problem", problemApi);
+router.use("/problems", problemApi);
 router.use("/friend-requests", friendRequestApi);
 router.use("/friends", friendApi);
 router.use("/studies", studyApi);
