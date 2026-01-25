@@ -17,7 +17,7 @@ router.use("/users", userApi);
 router.use("/problem", problemApi);
 router.use("/friend-request", friendRequestApi);
 router.use("/friend", friendApi);
-router.use("/study", studyApi);
+router.use("/studies", studyApi);
 router.use("/study-request", studyRequestApi);
 
 module.exports = router;
