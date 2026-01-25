@@ -33,17 +33,6 @@ router.post(
   endTx,
 );
 
-// owner가 study-request를 보내는 기능
-router.post(
-  "/:studyId/send",
-  authController.optionalRefresh,
-  authController.findUserByToken,
-  requireStudyOwner,
-  startTx,
-  studyRequestController.sendStudyRequest,
-  endTx,
-);
-
 // 특정 스터디 삭제
 router.delete(
   "/:studyId",

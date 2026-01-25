@@ -18,6 +18,6 @@ router.use("/problem", problemApi);
 router.use("/friend-request", friendRequestApi);
 router.use("/friend", friendApi);
 router.use("/studies", studyApi);
-router.use("/study-request", studyRequestApi);
+router.use("/study-requests", studyRequestApi);
 
 module.exports = router;
