@@ -24,7 +24,7 @@ app.use(
       cb(null, allow.has(origin));
     },
     credentials: true,
-  })
+  }),
 );
 
 app.use(
@@ -32,7 +32,7 @@ app.use(
     verify: (req, res, buf) => {
       req.rawBody = buf;
     },
-  })
+  }),
 );
 
 app.use(cookieParser());
@@ -65,7 +65,7 @@ mongoose
   .catch((e) => console.log("DB connection fail", e));
 
 app.get("/", (req, res) => {
-  res.json({ message: "Growithm Express 서버 동작 중 🚀" });
+  res.json({ message: "Growithm Express 서버 동작 중" });
 });
 
 app.listen(PORT, "0.0.0.0", () => {
