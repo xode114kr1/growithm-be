@@ -39,6 +39,6 @@ jobs:
             set -e
             cd ${{ secrets.EC2_APP_DIR }}
             docker pull xode114kr1/growithm-be:prod
-            docker-compose down
+            docker pull xode114kr1/growithm-be:prod
             docker-compose up -d
             docker image prune -f
