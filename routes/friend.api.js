@@ -6,17 +6,15 @@ const friendController = require("../controllers/friend.controller");
 const friendRequestController = require("../controllers/friendRequest.controller");
 const { startTx, endTx } = require("../middlewares/transaction");
 
-// me의 friendList를 요청
+// 내 친구 목록 조회
 router.get(
   "/me",
   authController.optionalRefresh,
   authController.findUserByToken,
-  friendController.getFriendList
+  friendController.getFriendList,
 );
 
-// friend를 삭제하는 요청
-// 1. friend-request를 삭제
-// 2. user의 friends에서 friendId를 삭제
+// 특정 친구 삭제
 router.delete(
   "/:friendId",
   authController.optionalRefresh,
@@ -24,6 +22,6 @@ router.delete(
   startTx,
   friendRequestController.deleteFriendRequest,
   friendController.deleteFriend,
-  endTx
+  endTx,
 );
 module.exports = router;

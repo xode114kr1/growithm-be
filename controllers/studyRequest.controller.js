@@ -67,7 +67,7 @@ studyRequestController.sendStudyRequest = async (req, res, next) => {
 
     await StudyRequest.create([{ studyId, userId: inviteUser }], { session });
 
-    res.status(200).json({ message: "Success to send study request" });
+    res.status(201).json({ message: "Success to send study request" });
     return next();
   } catch (error) {
     return next(error);
@@ -117,7 +117,7 @@ studyRequestController.acceptStudyRequest = async (req, res, next) => {
     const updatedStudy = await Study.findByIdAndUpdate(
       studyId,
       { $addToSet: { members: userId } },
-      { session, new: true }
+      { session, new: true },
     );
 
     if (!updatedStudy) {
@@ -130,10 +130,10 @@ studyRequestController.acceptStudyRequest = async (req, res, next) => {
     await StudyUserScore.findOneAndUpdate(
       { user: userId, study: studyId },
       { $setOnInsert: { user: userId, study: studyId, score: 0 } },
-      { upsert: true, new: true, session }
+      { upsert: true, new: true, session },
     );
 
-    res.status(200).json({ message: "Success to accept study" });
+    res.status(204).json({ message: "Success to accept study" });
     return next();
   } catch (error) {
     return next(error);
@@ -144,7 +144,7 @@ studyRequestController.rejectStudyRequest = async (req, res, next) => {
   try {
     const { studyRequestId } = req.params;
     await StudyRequest.findByIdAndDelete(studyRequestId);
-    return res.status(200).json({ message: "Success reject study request" });
+    return res.status(204).json({ message: "Success reject study request" });
   } catch (error) {
     return next(error);
   }

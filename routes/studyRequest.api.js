@@ -4,15 +4,29 @@ const { startTx, endTx } = require("../middlewares/transaction");
 
 const authController = require("../controllers/auth.controller");
 const studyRequestController = require("../controllers/studyRequest.controller");
+const { requireStudyOwner } = require("../middlewares/authorization");
 
+// 내가 받은 스터디 요청 조회
 router.get(
-  "/",
+  "/me/received",
   authController.optionalRefresh,
   authController.findUserByToken,
-  studyRequestController.getStudyRequestList
+  studyRequestController.getStudyRequestList,
 );
 
-router.get("/send/:studyId", studyRequestController.getSendStudyRequest);
+// 스터디 초대를 보내는 기능
+router.post(
+  "/studies/:studyId",
+  authController.optionalRefresh,
+  authController.findUserByToken,
+  requireStudyOwner,
+  startTx,
+  studyRequestController.sendStudyRequest,
+  endTx,
+);
+
+// 특정 스터디에서 보낸 요청 조회
+router.get("/studies/:studyId", studyRequestController.getSendStudyRequest);
 
 // router.post(
 //   "/send",
@@ -20,18 +34,20 @@ router.get("/send/:studyId", studyRequestController.getSendStudyRequest);
 //   studyRequestController.sendStudyRequest
 // );
 
-router.post(
+// 스터디 요청 수락
+router.patch(
   "/:studyRequestId/accept",
   authController.optionalRefresh,
   authController.findUserByToken,
   startTx,
   studyRequestController.acceptStudyRequest,
-  endTx
+  endTx,
 );
 
+// 스터디 요청 거절
 router.delete(
   "/:studyRequestId/reject",
-  studyRequestController.rejectStudyRequest
+  studyRequestController.rejectStudyRequest,
 );
 
 module.exports = router;

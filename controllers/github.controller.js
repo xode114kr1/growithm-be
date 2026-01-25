@@ -8,7 +8,7 @@ const {
 const Problem = require("../models/Problem");
 const { decryptToken } = require("../utils/tokenCrypto");
 
-const flatformMap = { 백준: "beakjoon", 프로그래머스: "programmers" };
+const flatformMap = { 백준: "baekjoon", 프로그래머스: "programmers" };
 
 const githubController = {};
 
@@ -96,7 +96,7 @@ githubController.savePendingData = async (req, res, next) => {
     ]);
 
     let newPending;
-    if (platform == "beakjoon") {
+    if (platform == "baekjoon") {
       newPending = parseBaekjoonReadme(readmd);
     } else if (platform == "programmers") {
       newPending = parseProgrammersReadme(readmd);
@@ -148,7 +148,7 @@ githubController.savePendingData = async (req, res, next) => {
       {
         upsert: true,
         new: true,
-      }
+      },
     );
 
     return res.status(201).json({ message: "Success receive webhook" });

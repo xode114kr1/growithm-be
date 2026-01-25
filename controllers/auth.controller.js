@@ -27,7 +27,7 @@ authController.exchangeToken = async (req, res, next) => {
       },
       {
         headers: { Accept: "application/json" },
-      }
+      },
     );
 
     const accessToken = tokenResponse.data.access_token;
@@ -90,12 +90,12 @@ authController.issueTokensAndRespond = (req, res, next) => {
   const accessToken = jwt.sign(
     { userId: user._id },
     process.env.JWT_ACCESS_SECRET,
-    { expiresIn: "15m" }
+    { expiresIn: "15m" },
   );
   const refreshToken = jwt.sign(
     { userId: user._id },
     process.env.JWT_REFRESH_SECRET,
-    { expiresIn: "7d" }
+    { expiresIn: "7d" },
   );
 
   res.cookie("accessToken", accessToken, {
@@ -114,7 +114,7 @@ authController.issueTokensAndRespond = (req, res, next) => {
     path: "/",
   });
 
-  return res.json({
+  return res.status(200).json({
     message: "github login success",
     data: user,
     accessToken,
@@ -160,7 +160,7 @@ authController.optionalRefresh = async (req, res, next) => {
       process.env.JWT_ACCESS_SECRET,
       {
         expiresIn: "15m",
-      }
+      },
     );
 
     req.accessToken = newAccessToken;
