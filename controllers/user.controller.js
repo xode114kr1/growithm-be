@@ -13,7 +13,7 @@ userController.logout = async (req, res, next) => {
   res.clearCookie("accessToken", cookieOptions);
   res.clearCookie("refreshToken", cookieOptions);
 
-  return res.json({ message: "logout" });
+  return res.status(204).json({ message: "logout" });
 };
 
 userController.getUserByName = async (req, res, next) => {
