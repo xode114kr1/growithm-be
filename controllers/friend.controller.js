@@ -26,16 +26,16 @@ friendController.deleteFriend = async (req, res, next) => {
     await User.findByIdAndUpdate(
       userId,
       { $pull: { friends: friendId } },
-      { new: true, session }
+      { new: true, session },
     );
 
     await User.findByIdAndUpdate(
       friendId,
       { $pull: { friends: userId } },
-      { new: true, session }
+      { new: true, session },
     );
 
-    res.status(200).json({ message: "Success delete friend" });
+    res.status(204).json({ message: "Success delete friend" });
     return next();
   } catch (error) {
     return next(error);
