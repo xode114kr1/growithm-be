@@ -16,6 +16,7 @@ const allow = new Set([
   "https://growithm.netlify.app",
   "http://localhost:5173",
   "https://d8jits09l6k4j.cloudfront.net",
+  "https://growithm.net/",
 ]);
 
 app.use(
