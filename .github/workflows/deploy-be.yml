@@ -7,7 +7,6 @@ on:
 
 jobs:
   deploy:
-    # PR이 "merge"되어서 closed 된 경우에만 실행
     if: ${{ github.event.pull_request.merged == true }}
     runs-on: ubuntu-latest
 
@@ -15,20 +14,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Docker Hub 로그인
       - name: Docker Login
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      # 이미지 빌드 & 푸시 (네가 하던 그대로)
       - name: Build and Push (prod)
         run: |
           docker build -t xode114kr1/growithm-be:prod .
           docker push xode114kr1/growithm-be:prod
 
-      # EC2에 SSH 접속해서 pull + 재시작
       - name: Deploy on EC2
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -39,6 +35,5 @@ jobs:
             set -e
             cd ${{ secrets.EC2_APP_DIR }}
             docker pull xode114kr1/growithm-be:prod
-            docker pull xode114kr1/growithm-be:prod
-            docker-compose up -d
+            docker-compose up -d --force-recreate
             docker image prune -f
