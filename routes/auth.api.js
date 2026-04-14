@@ -6,7 +6,6 @@ const userController = require("../controllers/user.controller");
 // 새로 고침 시 access_token, user 재전송
 router.get(
   "/refresh",
-  authController.hasAccessToken,
   authController.optionalRefresh,
   authController.findUserByToken,
   authController.issueTokensAndRespond,

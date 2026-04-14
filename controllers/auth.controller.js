@@ -8,6 +8,13 @@ const authController = {};
 const CLIENT_ID = process.env.GITHUB_CLIENT_ID;
 const CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 
+const tokenCookieOptions = {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  path: "/",
+};
+
 authController.exchangeToken = async (req, res, next) => {
   try {
     const { code } = req.body;
@@ -99,49 +106,32 @@ authController.issueTokensAndRespond = (req, res, next) => {
   );
 
   res.cookie("accessToken", accessToken, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    ...tokenCookieOptions,
     maxAge: 15 * 60 * 1000,
-    path: "/",
   });
 
   res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "none",
+    ...tokenCookieOptions,
     maxAge: 7 * 24 * 60 * 60 * 1000,
-    path: "/",
   });
 
   return res.status(200).json({
     message: "github login success",
     data: user,
-    accessToken,
-    refreshToken,
   });
 };
 
 authController.optionalRefresh = async (req, res, next) => {
-  const cookieToken = req.cookies?.accessToken ?? null;
+  const accessToken = req.cookies?.accessToken ?? null;
 
-  const auth = req.headers?.authorization ?? null;
-  const headerToken = auth && req.headers?.authorization.split(" ")[1];
-
-  const accessToken = cookieToken || headerToken;
-
-  if (!accessToken) {
-    const error = new Error("Access token is missing");
-    error.status = 401;
-    return next(error);
-  }
-
-  try {
-    jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
-    req.accessToken = accessToken;
-    return next();
-  } catch (err) {
-    if (err.name !== "TokenExpiredError") return next(err);
+  if (accessToken) {
+    try {
+      jwt.verify(accessToken, process.env.JWT_ACCESS_SECRET);
+      req.accessToken = accessToken;
+      return next();
+    } catch (err) {
+      if (err.name !== "TokenExpiredError") return next(err);
+    }
   }
 
   try {
@@ -164,11 +154,14 @@ authController.optionalRefresh = async (req, res, next) => {
     );
 
     req.accessToken = newAccessToken;
-    res.cookie("accessToken", newAccessToken, cookieOptions);
+    res.cookie("accessToken", newAccessToken, {
+      ...tokenCookieOptions,
+      maxAge: 15 * 60 * 1000,
+    });
 
     return next();
-  } catch {
-    return next();
+  } catch (error) {
+    return next(error);
   }
 };
 
@@ -189,24 +182,6 @@ authController.findUserByToken = async (req, res, next) => {
 
     const user = await User.findById(userId);
     req.user = user;
-    next();
-  } catch (error) {
-    return next(error);
-  }
-};
-
-authController.hasAccessToken = async (req, res, next) => {
-  try {
-    const cookieToken = req.cookies?.accessToken ?? null;
-
-    const auth = req.headers?.authorization ?? null;
-    const headerToken = auth && req.headers?.authorization.split(" ")[1];
-
-    const accessToken = cookieToken || headerToken;
-
-    if (!accessToken) {
-      return res.status(401).json({ message: "Access token is missing" });
-    }
     next();
   } catch (error) {
     return next(error);
